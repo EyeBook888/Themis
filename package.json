@@ -1,0 +1,9 @@
+{
+  "name": "Themis [LAUNCHER]",
+  "main": "index.html",
+  "window" : {
+    "toolbar": true
+  },
+  "single-instance" : false,
+  "version": "alpha 0.1.0"
+}
