@@ -108,10 +108,20 @@ function Game(strName, playerHost){
     			if(this.getTroopsIdByPosition(pointPosition).length > 0){//check if there is a troop over the planet
     				//add population amount to the troop
     				var intId = this.getTroopsIdByPosition(pointPosition)[0];
-    				this.arrayWorldInformation["troops"][intId]["size"] += arrayPlanets[i]["population"]
+    				this.arrayWorldInformation["troops"][intId]["size"] += Math.round(arrayPlanets[i]["population"]);
+
+    				//increase technical level
+    				this.arrayWorldInformation["troops"][intId]["technicLevel"] += arrayPlanets[i]["knowledge"]*0.03;
+
+    				//max level is 5
+    				//todo: define by race
+    				this.arrayWorldInformation["troops"][intId]["technicLevel"] = Math.min(5, this.arrayWorldInformation["troops"][intId]["technicLevel"]);
+
+
+
     			}else{
     				//spawn a new Troop
-    				arrayNewTroop = {"size": arrayPlanets[i]["population"], "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 2, "moveAble" : true};
+    				arrayNewTroop = {"size": Math.round(arrayPlanets[i]["population"]), "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 1, "moveAble" : true};
     				this.arrayWorldInformation["troops"].push(arrayNewTroop);
     			}
     		}
@@ -199,7 +209,7 @@ function Game(strName, playerHost){
 			}
 
 			//test if the player trys to move a troop out of its range
-			var intTechnicLevel = this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["technicLevel"];
+			var intTechnicLevel = Math.floor(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["technicLevel"]);
 			var pointCurrentPosition = new point(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"], this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"])
 			var pointDestination = new point(arrayCommand["newX"], arrayCommand["newY"]);
 
@@ -292,9 +302,14 @@ function Game(strName, playerHost){
 			console.log(this.getPlanetIdByPosition(pointNewPlanetAt));
 		} while(this.getPlanetIdByPosition(pointNewPlanetAt) != null)
 
-		intPopulation = 1; //todo: random
+		//per 1 Population size of troop increase by one
+		intPopulation = Math.floor(Math.random()*3*10)/10;
 
-		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation}
+		//per 1 Knowledge technical Level is by 0.03
+		intKnowledge = Math.floor(Math.random()*10);
+
+
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "knowledge" : intKnowledge}
 	}
 
 

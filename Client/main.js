@@ -153,6 +153,22 @@ function gameProjection(){
       intPlanetId = this.getPlanetIdByPosition(this.pointHover)
       strInfoHTML += "<br>-- Planet --<br>" ;
       strInfoHTML += "population: " + this.arrayWorldInformation["planets"][intPlanetId]["population"] + " billion <br>";
+
+
+      strInfoHTML += "knowledge: ";
+      intKnowledge = this.arrayWorldInformation["planets"][intPlanetId]["knowledge"]
+      //schow ++ + o - -- instead of number
+      if(intKnowledge == 10 || intKnowledge == 9 ){
+        strInfoHTML += "++<br>" ;
+      }else if(intKnowledge == 8 || intKnowledge == 7 ){
+        strInfoHTML += "+<br>" ;
+      }else if(intKnowledge == 6 || intKnowledge == 5 ){
+        strInfoHTML += "o<br>" ;
+      }else if(intKnowledge == 4 || intKnowledge == 3 ){
+        strInfoHTML += "-<br>" ;
+      }else{
+        strInfoHTML += "--<br>" ;
+      }
     }
     
     if(strInfoHTML == ""){
@@ -292,7 +308,7 @@ function gameProjection(){
           var intTroopId = this.getTroopIdByPosition(this.pointSelection);
 
           //find out which technicLevel the troop has because it says how many fields the Troop can move.
-          intTechnicLevel = this.arrayWorldInformation["troops"][intTroopId]["technicLevel"]
+          intTechnicLevel = Math.floor(this.arrayWorldInformation["troops"][intTroopId]["technicLevel"]);
 
           if(this.pointSelection.equal(pointCurrentHexagon) || (new hexagonalGrid().areXAwayNeighbor(this.pointSelection, pointCurrentHexagon, intTechnicLevel)) ){
             //selection
