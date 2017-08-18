@@ -266,6 +266,13 @@ function Game(strName, playerHost){
 
 
 			return;
+		}else if(arrayCommand["command"] == "ENDTURN"){//end the turn
+			//check if it is the Turn of the player
+			if(this.arrayWorldInformation["moveOf"] != this.arrayMyPlayers.indexOf(playerPlayer)){
+				console.log(playerPlayer.strName + " try end a Turn that isn't his.")
+				return;
+			}
+			this.nextTurn();
 		}
 
 		console.error("unknown game-command");

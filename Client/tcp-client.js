@@ -26,7 +26,7 @@ function createClient(strIp, strStartMessage){
 
 	
 	//make the connection
-	client.connect(1338, strIp, function() {
+	client.connect(1331, strIp, function() {
 		console.log('Connected');
 		client.write(strStartMessage);
 	});

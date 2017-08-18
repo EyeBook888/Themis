@@ -155,6 +155,12 @@ function gameProjection(){
 
   }
 
+  //if the player clicks on end Turn
+  this.endTurn = function(){
+    strJson = '{ "type": "GAMECOMMAND", "command": "ENDTURN" }'
+    sendToServer(strJson)
+  }
+
 
 
   this.onMouseDown = function(eventE){//the click event
@@ -253,7 +259,7 @@ function gameProjection(){
     this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height)
 
     this.contextContext.fillStyle = "rgba(255, 255, 255, 0)"
-    this.contextContext.strokeStyle = "rgba(0, 255, 0, 1)"
+    this.contextContext.strokeStyle = "rgba(0, 255, 0, 0.1)"
 
 
 
@@ -360,6 +366,13 @@ function gameProjection(){
       document.getElementById("gameInfo").style.color = "blue";
     }else{
       document.getElementById("gameInfo").style.color = "red";
+    }
+
+    //show or hide end Turn button
+    if(this.arrayWorldInformation["moveOf"] == this.arrayWorldInformation["youAre"]){//player1 is blue and player2 is red
+      document.getElementById("endTurn").style.visibility = "visible";
+    }else{
+       document.getElementById("endTurn").style.visibility = "hidden";
     }
 
 
@@ -491,5 +504,5 @@ if(parseURLParams()["auto"] == "true"){
     window.moveBy(-window.outerWidth, window.outerHeight)
   }
 
-  connectToServer()
+  window.setTimeout(function(){connectToServer()}, 100);
 }

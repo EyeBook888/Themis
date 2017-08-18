@@ -14,6 +14,20 @@ function clearInfo(){
 
 
 
+//for end the server and other commands
+var stdin = process.openStdin();
+
+stdin.addListener("data", function(d) {
+	var strCommand =  d.toString().trim();
+
+	if(strCommand == "stop"){//end the server
+		closeServer();//close the Server
+		process.exit(0);
+	}
+
+  });
+
+
 
 // files are included here:
 var fs = require('fs');
@@ -21,3 +35,4 @@ eval(fs.readFileSync('../both/math.js')+'');
 eval(fs.readFileSync('../both/main.js')+'');
 eval(fs.readFileSync('./tcp-server.js')+'');
 eval(fs.readFileSync('./main.js')+'');
+

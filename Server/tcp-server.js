@@ -15,7 +15,7 @@ function createServer(){
 	// save all the clients connected 
 	arrayAllSockets = new Array();
 	
-	var server = net.createServer(function(socket) {
+	serverTcpIpServer = net.createServer(function(socket) {
 
 		//Add the socket to the array to save all sockets
 		arrayAllSockets.push(socket);
@@ -32,7 +32,7 @@ function createServer(){
 
 	});
 
-	server.listen(1338);
+	serverTcpIpServer.listen(1331);
 }
 
 
@@ -73,4 +73,11 @@ function sendToEveryone(strText){
 	for (var i = 0; i < arrayAllSockets.length; i++) {
 		sendToSocket(i, strText)
 	};
+}
+
+function closeServer(){
+	for (var i = 0; i < arrayAllSockets.length; i++) {
+		arrayAllSockets[i].destroy()
+	};
+    serverTcpIpServer.close()
 }
