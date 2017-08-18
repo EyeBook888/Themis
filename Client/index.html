@@ -1,20 +1,32 @@
 <html>
 <head>
 <title>Themis</title>
+
+<link rel="stylesheet" type="text/css" href="../both/style.css">
+
 </head>
 <body>
 
 
 <script language="Javascript">require('nw.gui').Window.get().showDevTools();</script>
 
+<!-- menu to connect to a server !-->
+<div id="Serverselector" style="position:absolute; top:0px; left:0px; width:100%;">
+  <div class="frame">
+  direct connect:<br>
+  > <input type="text" id="serverIp" placeholder="Ip" /><br>
+  > <input type="text" id="name" placeholder="Name"/><br>
+  > <input type="button" onClick="connectToServer()" value="connect">
+  </div>
 
-<div id="Serverselector" style="position:absolute; top:0px; left:0px;">
-  <input type="text" id="serverIp" placeholder="Ip" />
-  <input type="text" id="name" placeholder="Name"/>
-  <input type="button" onClick="connectToServer()" value="connect">
   <br><br>
-  <a href="./index.html" target="_blank">open a 2ed game</a> 
+  <br><br>
+  > <a href="./index.html" target="_blank">open a 2ed game</a> 
 </div>
+
+
+
+
 
 <div id="lobbyUi" style="visibility:hidden; position:absolute; top:0px; left:0px;">
   <div id="lobbyInfo">
@@ -27,12 +39,12 @@
 
 
 <div id="game" style="visibility:hidden; position:absolute; top:0px; left:0px; width:100%; height:100%; background-color:black;">
-  <canvas id="gameBoard" style="position:absolute; top:0px; left:0px; width:100%; height:80%;" ></canvas>
+  <canvas id="gameBoard" class="frame" style="position:absolute; top:0px; left:0px; width:95%;" ></canvas>
   <div style="position:absolute; top:0px; right:0px;">
     <div id="gameInfo" style="background-color:rgba(255, 255, 255, 0.5)"></div>
     <input type="button" id="endTurn" value="end Turn" onClick="gameProjectionCurrentGame.endTurn()">
   </div>
-  <div id="HoverInfo" style="position:absolute; bottom:0px; left:0px; color:green;"> hover over a troop or planet</div>
+  <div id="HoverInfo" class="frame" style="position:absolute; bottom:0px; left:0px; color:green;"> hover over a troop or planet</div>
 </div>
 
 <div id="versionInfo" style="position:absolute; bottom:0px; right:0px; background-color:rgba(255, 255, 255, 0.3); color:black;" ></div>

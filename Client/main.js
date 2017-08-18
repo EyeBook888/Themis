@@ -241,11 +241,8 @@ function gameProjection(){
 
   this.draw = function(){
 
-
-    //fit the canvas size
+    //fit the canvas size (width)
     this.canvasCanvas.width = this.canvasCanvas.offsetWidth;
-    this.canvasCanvas.height = this.canvasCanvas.offsetHeight;
-
 
     //calculate the Hexagon Size
     var intMapHeight = this.arrayWorldInformation["mapHeight"]
@@ -253,6 +250,10 @@ function gameProjection(){
 
     var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
     var intHexHeight = intHexWidth;
+
+    //fit the canvas size (height)
+    this.canvasCanvas.height = intMapHeight * intHexHeight - intHexHeight;
+    this.canvasCanvas.style.height = (intMapHeight * intHexHeight - intHexHeight) + "px";
 
 
     this.contextContext.fillStyle = "black"
