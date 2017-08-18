@@ -125,15 +125,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="392.81114"
-     inkscape:cy="752.03772"
+     inkscape:zoom="3.959798"
+     inkscape:cx="288.59298"
+     inkscape:cy="812.64687"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1300"
      inkscape:window-height="1019"
-     inkscape:window-x="437"
+     inkscape:window-x="489"
      inkscape:window-y="0"
      inkscape:window-maximized="0" />
   <metadata
@@ -144,7 +144,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -223,7 +223,8 @@
           </g>
         </g>
         <g
-           id="g3852">
+           id="g3852"
+           transform="matrix(1,0,0,0.37399392,0,152.00877)">
           <path
              sodipodi:nodetypes="ccccccc"
              inkscape:connector-curvature="0"
@@ -281,7 +282,7 @@
           </g>
         </g>
         <rect
-           style="fill:#000000;fill-opacity:1;stroke:none"
+           style="fill:#aa0000;fill-opacity:1;stroke:none"
            id="rect3059"
            width="5.8083768"
            height="42.931484"
@@ -364,7 +365,8 @@
           </g>
         </g>
         <g
-           id="g3046">
+           id="g3046"
+           transform="matrix(1,0,0,0.34575305,-0.35714285,160.11766)">
           <path
              style="fill:#b3b3b3;fill-opacity:1;stroke:none"
              d="m 184.35284,242.72492 18.62469,0 c -0.3578,1.0986 1.93606,2.44973 3.34603,3.29579 l 30.03343,0.23969 18.70652,66.165 -29.93044,0 z"
@@ -430,7 +432,7 @@
            height="42.931484"
            width="5.8083768"
            id="rect3064"
-           style="fill:#000000;fill-opacity:1;stroke:none" />
+           style="fill:#003380;fill-opacity:1;stroke:none" />
       </g>
     </g>
   </g>

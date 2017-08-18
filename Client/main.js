@@ -15,8 +15,17 @@ function gameProjection(){
   //load the needed images
   this.arrayImages = new Array();
   //planets
+  this.arrayImages["planet00"] = new Image();
+  this.arrayImages["planet00"].src = "../Images/planet00.png"
+  
   this.arrayImages["planet01"] = new Image();
   this.arrayImages["planet01"].src = "../Images/planet01.png"
+  
+  this.arrayImages["planet02"] = new Image();
+  this.arrayImages["planet02"].src = "../Images/planet02.png"
+  
+  this.arrayImages["planet03"] = new Image();
+  this.arrayImages["planet03"].src = "../Images/planet03.png"
   //troops
   this.arrayImages["troopRedSmall"] = new Image();
   this.arrayImages["troopRedSmall"].src = "../Images/troopRedSmall.png"
@@ -319,10 +328,15 @@ function gameProjection(){
       
       var intX = arrayPlanets[i]["positionX"];
       var intY = arrayPlanets[i]["positionY"];
+
+      //select the Image for the plant
+      arrayPlanetImageNames = new Array("planet00", "planet01", "planet02", "planet03");
+      strPlanetImageName = arrayPlanetImageNames[i%4];
+
       
       //draw the planet (todo: draw a Image)
       this.contextContext.drawImage(
-        this.arrayImages["planet01"],
+        this.arrayImages[strPlanetImageName],
         intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/4,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
         intY*intHexHeight*(3/4) +intHexHeight/4,//make the Rect a bit smaller.
         intHexWidth - 2 * intHexWidth/4,//make the Rect a bit smaller.

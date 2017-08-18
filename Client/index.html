@@ -39,7 +39,10 @@
 
 
 <div id="game" style="visibility:hidden; position:absolute; top:0px; left:0px; width:100%; height:100%; background-color:black;">
-  <canvas id="gameBoard" class="frame" style="position:absolute; top:0px; left:0px; width:95%;" ></canvas>
+  
+  <canvas id="gameBoard" style="position:absolute; top:0px; left:0px; width:100%; border-bottom-width:3px; border-bottom-style:dashed;" ></canvas>
+
+  
   <div style="position:absolute; top:0px; right:0px;">
     <div id="gameInfo" style="background-color:rgba(255, 255, 255, 0.5)"></div>
     <input type="button" id="endTurn" value="end Turn" onClick="gameProjectionCurrentGame.endTurn()">
