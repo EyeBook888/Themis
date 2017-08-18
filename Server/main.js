@@ -357,28 +357,28 @@ function update(){
 	//update the display
 
 	//clear the Window
-	document.body.innerHTML = "";
+	clearInfo();
 
 	//print the clients on the window
-	document.body.innerHTML = document.body.innerHTML + "<h3>----------------------- Player ---------------------</h3>";
+	printInfo("<h3>----------------------- Player ---------------------</h3>");
 	for (var i = 0; i < arrayAllPlayers.length; i++) {
-		document.body.innerHTML = document.body.innerHTML + i + ": " + arrayAllPlayers[i].strName + "<br>";
+		printInfo(i + ": " + arrayAllPlayers[i].strName + "<br>");
 	};
 
-	document.body.innerHTML = document.body.innerHTML + "<h3>----------------------- Games ----------------------</h3>";
+	printInfo("<h3>----------------------- Games ----------------------</h3>");
 	for (var i = 0; i < arrayAllGames.length; i++) {
-		document.body.innerHTML += i + ": " + arrayAllGames[i].strName +  " (";
+		printInfo(i + ": " + arrayAllGames[i].strName +  " (");
 
 		//display all players in the game
 		for (var x = 0; x < arrayAllGames[i].arrayMyPlayers.length; x++) {
 			if(x != 0){
-				document.body.innerHTML += "|";
+				printInfo("|");
 			}
-			document.body.innerHTML += arrayAllGames[i].arrayMyPlayers[x].strName
+			printInfo(arrayAllGames[i].arrayMyPlayers[x].strName);
 		};
-		document.body.innerHTML += ") <br>";
+		printInfo(") <br>");
 	};
-	document.body.innerHTML += "version: "+ getVersion();
+	printInfo("version: "+ getVersion());
 
 	//kick disconnected Player;
 	for (var i = 0; i < arrayAllPlayers.length; i++) {
@@ -423,7 +423,7 @@ function getLobby(){//return all Information that is needed to show the Lobby
 	return strLobbyInformation;
 }
 
-window.setInterval(update, 100);
+callInInterval(update, 100);
 
 
 createServer();

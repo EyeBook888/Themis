@@ -1,4 +1,3 @@
-
 gameProjectionCurrentGame = null;
 
 function gameProjection(){
@@ -11,6 +10,21 @@ function gameProjection(){
   this.intSelection = new point(0, 0);
   this.pointHover = new point(0, 0);
   this.pointSelection = new point(-1, -1);//a negative value means no selection
+
+
+  //load the needed images
+  this.arrayImages = new Array();
+  //planets
+  this.arrayImages["planet01"] = new Image();
+  this.arrayImages["planet01"].src = "../Images/planet01.png"
+  //troops
+  this.arrayImages["troopRedSmall"] = new Image();
+  this.arrayImages["troopRedSmall"].src = "../Images/troopRedSmall.png"
+
+    this.arrayImages["troopBlueSmall"] = new Image();
+  this.arrayImages["troopBlueSmall"].src = "../Images/troopBlueSmall.png"
+
+
 
   intTestDistance = 2;
 
@@ -239,7 +253,7 @@ function gameProjection(){
     this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height)
 
     this.contextContext.fillStyle = "rgba(255, 255, 255, 0)"
-    this.contextContext.strokeStyle = "rgb(255, 255, 255)"
+    this.contextContext.strokeStyle = "rgba(0, 255, 0, 1)"
 
 
 
@@ -271,7 +285,7 @@ function gameProjection(){
         }
 
 
-        this.contextContext.fillStyle = "rgba(255, 255, 255, " + floatAlphaValue + ")"
+        this.contextContext.fillStyle = "rgba(0, 255, 0, " + floatAlphaValue + ")"
         
 
         this.contextContext.fillHexagon(
@@ -284,35 +298,10 @@ function gameProjection(){
     };
 
 
-
-
-    //draw the troops
-    var arrayTroops = this.arrayWorldInformation["troops"]
-    for (var i = 0; i < arrayTroops.length; i++) {
-      //fit the color
-      if(arrayTroops[i]["player"] == 1){//player1 is blue and player2 is red
-        this.contextContext.fillStyle = "blue"
-      }else{
-        this.contextContext.fillStyle = "red"
-      }
-      
-      var intX = arrayTroops[i]["positionX"];
-      var intY = arrayTroops[i]["positionY"];
-      
-      //draw the troop (todo: draw a Image)
-      this.contextContext.fillHexagon(
-      intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
-      intY*intHexHeight*(3/4),
-      intHexWidth,
-      intHexHeight)
-
-    };
-
-
      //draw the planets
     var arrayPlanets = this.arrayWorldInformation["planets"]
     for (var i = 0; i < arrayPlanets.length; i++) {
-      //fit the color (just as a test)
+      //fit the image
       if(arrayPlanets[i]["player"] == 0){//player1 is blue and player2 is red
         this.contextContext.fillStyle = "rgb(255, 100, 100)"
       }else if(arrayPlanets[i]["player"] == 1){
@@ -325,13 +314,40 @@ function gameProjection(){
       var intY = arrayPlanets[i]["positionY"];
       
       //draw the planet (todo: draw a Image)
-      this.contextContext.fillRect(
-      intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/3,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
-      intY*intHexHeight*(3/4) +intHexHeight/3,//make the Rect a bit smaller.
-      intHexWidth - 2 * intHexWidth/3,//make the Rect a bit smaller.
-      intHexHeight- 2 * intHexHeight/3)//make the Rect a bit smaller.
+      this.contextContext.drawImage(
+        this.arrayImages["planet01"],
+        intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/4,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
+        intY*intHexHeight*(3/4) +intHexHeight/4,//make the Rect a bit smaller.
+        intHexWidth - 2 * intHexWidth/4,//make the Rect a bit smaller.
+        intHexHeight- 2 * intHexHeight/4)//make the Rect a bit smaller.
 
     };
+
+
+
+    //draw the troops
+    var arrayTroops = this.arrayWorldInformation["troops"]
+    for (var i = 0; i < arrayTroops.length; i++) {
+      //fit the image
+      if(arrayTroops[i]["player"] == 0){//player1 is blue and player2 is red
+        var strImageId = "troopRedSmall";
+      }else{
+        var strImageId = "troopBlueSmall";
+      }
+      
+      var intX = arrayTroops[i]["positionX"];
+      var intY = arrayTroops[i]["positionY"];
+      
+      //draw the Image
+      this.contextContext.drawImage(
+        this.arrayImages[strImageId],
+        intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+        intY*intHexHeight*(3/4),
+        intHexWidth,
+        intHexHeight)
+
+    };
+
 
 
 
