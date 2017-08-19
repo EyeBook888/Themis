@@ -37,6 +37,13 @@ function createServer(){
     		arrayAllSockets[intSocketId].writable = false;
 		});
 
+  		socket.on('error', function() {
+    		//set the socket to not ridable
+    		intSocketId = arrayAllSockets.indexOf(this);
+    		arrayAllSockets[intSocketId] = new Array();
+    		arrayAllSockets[intSocketId].writable = false;
+		});
+
 	});
 
 	serverTcpIpServer.listen(1331);
