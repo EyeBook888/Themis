@@ -15,7 +15,7 @@ function createServer(){
 	// save all the clients connected 
 	arrayAllSockets = new Array();
 	
-	var server = net.createServer(function(socket) {
+	serverTcpIpServer = net.createServer(function(socket) {
 
 		//Add the socket to the array to save all sockets
 		arrayAllSockets.push(socket);
@@ -30,9 +30,23 @@ function createServer(){
 
   		});
 
+  		socket.on('close', function() {
+    		//set the socket to not ridable
+    		intSocketId = arrayAllSockets.indexOf(this);
+    		arrayAllSockets[intSocketId] = new Array();
+    		arrayAllSockets[intSocketId].writable = false;
+		});
+
+  		socket.on('error', function() {
+    		//set the socket to not ridable
+    		intSocketId = arrayAllSockets.indexOf(this);
+    		arrayAllSockets[intSocketId] = new Array();
+    		arrayAllSockets[intSocketId].writable = false;
+		});
+
 	});
 
-	server.listen(1337);
+	serverTcpIpServer.listen(1331);
 }
 
 
@@ -73,4 +87,21 @@ function sendToEveryone(strText){
 	for (var i = 0; i < arrayAllSockets.length; i++) {
 		sendToSocket(i, strText)
 	};
+}
+
+function getAmountOfConnectedClients(){
+	intAmount = 0;
+	for (var i = 0; i < arrayAllSockets.length; i++) {
+		if(isConnectionToSocket(i)){
+			intAmount++;
+		}
+	};
+	return intAmount;
+}
+
+function closeServer(){
+	for (var i = 0; i < arrayAllSockets.length; i++) {
+		arrayAllSockets[i].destroy()
+	};
+    serverTcpIpServer.close()
 }

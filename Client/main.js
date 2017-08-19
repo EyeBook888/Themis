@@ -1,4 +1,3 @@
-
 gameProjectionCurrentGame = null;
 
 function gameProjection(){
@@ -11,6 +10,30 @@ function gameProjection(){
   this.intSelection = new point(0, 0);
   this.pointHover = new point(0, 0);
   this.pointSelection = new point(-1, -1);//a negative value means no selection
+
+
+  //load the needed images
+  this.arrayImages = new Array();
+  //planets
+  this.arrayImages["planet00"] = new Image();
+  this.arrayImages["planet00"].src = "../Images/planet00.png"
+  
+  this.arrayImages["planet01"] = new Image();
+  this.arrayImages["planet01"].src = "../Images/planet01.png"
+  
+  this.arrayImages["planet02"] = new Image();
+  this.arrayImages["planet02"].src = "../Images/planet02.png"
+  
+  this.arrayImages["planet03"] = new Image();
+  this.arrayImages["planet03"].src = "../Images/planet03.png"
+  //troops
+  this.arrayImages["troopRedSmall"] = new Image();
+  this.arrayImages["troopRedSmall"].src = "../Images/troopRedSmall.png"
+
+    this.arrayImages["troopBlueSmall"] = new Image();
+  this.arrayImages["troopBlueSmall"].src = "../Images/troopBlueSmall.png"
+
+
 
   intTestDistance = 2;
 
@@ -120,6 +143,7 @@ function gameProjection(){
       strInfoHTML+= "-- Troop --<br>";
       strInfoHTML+= "size: " + this.arrayWorldInformation["troops"][intTroopId]["size"] + "<br>";
       strInfoHTML+= "technology: " + this.arrayWorldInformation["troops"][intTroopId]["technicLevel"] + "<br>";
+      strInfoHTML+= "morale: " + this.arrayWorldInformation["troops"][intTroopId]["morale"] + "<br>";
     }
 
     
@@ -130,6 +154,24 @@ function gameProjection(){
       intPlanetId = this.getPlanetIdByPosition(this.pointHover)
       strInfoHTML += "<br>-- Planet --<br>" ;
       strInfoHTML += "population: " + this.arrayWorldInformation["planets"][intPlanetId]["population"] + " billion <br>";
+
+
+      strInfoHTML += "knowledge: ";
+      intKnowledge = this.arrayWorldInformation["planets"][intPlanetId]["knowledge"]
+      //schow ++ + o - -- instead of number
+      if(intKnowledge == 10 || intKnowledge == 9 ){
+        strInfoHTML += "++<br>" ;
+      }else if(intKnowledge == 8 || intKnowledge == 7 ){
+        strInfoHTML += "+<br>" ;
+      }else if(intKnowledge == 6 || intKnowledge == 5 ){
+        strInfoHTML += "o<br>" ;
+      }else if(intKnowledge == 4 || intKnowledge == 3 ){
+        strInfoHTML += "-<br>" ;
+      }else{
+        strInfoHTML += "--<br>" ;
+      }
+
+      strInfoHTML += "recovery factor: " + this.arrayWorldInformation["planets"][intPlanetId]["recoveryFactor"];
     }
     
     if(strInfoHTML == ""){
@@ -139,6 +181,12 @@ function gameProjection(){
       document.getElementById("HoverInfo").innerHTML = strInfoHTML;
     }
 
+  }
+
+  //if the player clicks on end Turn
+  this.endTurn = function(){
+    strJson = '{ "type": "GAMECOMMAND", "command": "ENDTURN" }'
+    sendToServer(strJson)
   }
 
 
@@ -221,11 +269,8 @@ function gameProjection(){
 
   this.draw = function(){
 
-
-    //fit the canvas size
+    //fit the canvas size (width)
     this.canvasCanvas.width = this.canvasCanvas.offsetWidth;
-    this.canvasCanvas.height = this.canvasCanvas.offsetHeight;
-
 
     //calculate the Hexagon Size
     var intMapHeight = this.arrayWorldInformation["mapHeight"]
@@ -234,12 +279,16 @@ function gameProjection(){
     var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
     var intHexHeight = intHexWidth;
 
+    //fit the canvas size (height)
+    this.canvasCanvas.height = (intMapHeight*0.75) * intHexHeight + intHexHeight*0.25;
+    this.canvasCanvas.style.height = ((intMapHeight*0.75) * intHexHeight + intHexHeight*0.25) + "px";
+
 
     this.contextContext.fillStyle = "black"
     this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height)
 
     this.contextContext.fillStyle = "rgba(255, 255, 255, 0)"
-    this.contextContext.strokeStyle = "rgb(255, 255, 255)"
+    this.contextContext.strokeStyle = "rgba(0, 255, 0, 0.1)"
 
 
 
@@ -262,7 +311,7 @@ function gameProjection(){
           var intTroopId = this.getTroopIdByPosition(this.pointSelection);
 
           //find out which technicLevel the troop has because it says how many fields the Troop can move.
-          intTechnicLevel = this.arrayWorldInformation["troops"][intTroopId]["technicLevel"]
+          intTechnicLevel = Math.floor(this.arrayWorldInformation["troops"][intTroopId]["technicLevel"]);
 
           if(this.pointSelection.equal(pointCurrentHexagon) || (new hexagonalGrid().areXAwayNeighbor(this.pointSelection, pointCurrentHexagon, intTechnicLevel)) ){
             //selection
@@ -271,7 +320,7 @@ function gameProjection(){
         }
 
 
-        this.contextContext.fillStyle = "rgba(255, 255, 255, " + floatAlphaValue + ")"
+        this.contextContext.fillStyle = "rgba(0, 255, 0, " + floatAlphaValue + ")"
         
 
         this.contextContext.fillHexagon(
@@ -284,35 +333,10 @@ function gameProjection(){
     };
 
 
-
-
-    //draw the troops
-    var arrayTroops = this.arrayWorldInformation["troops"]
-    for (var i = 0; i < arrayTroops.length; i++) {
-      //fit the color
-      if(arrayTroops[i]["player"] == 1){//player1 is blue and player2 is red
-        this.contextContext.fillStyle = "blue"
-      }else{
-        this.contextContext.fillStyle = "red"
-      }
-      
-      var intX = arrayTroops[i]["positionX"];
-      var intY = arrayTroops[i]["positionY"];
-      
-      //draw the troop (todo: draw a Image)
-      this.contextContext.fillHexagon(
-      intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
-      intY*intHexHeight*(3/4),
-      intHexWidth,
-      intHexHeight)
-
-    };
-
-
      //draw the planets
     var arrayPlanets = this.arrayWorldInformation["planets"]
     for (var i = 0; i < arrayPlanets.length; i++) {
-      //fit the color (just as a test)
+      //fit the image
       if(arrayPlanets[i]["player"] == 0){//player1 is blue and player2 is red
         this.contextContext.fillStyle = "rgb(255, 100, 100)"
       }else if(arrayPlanets[i]["player"] == 1){
@@ -323,15 +347,47 @@ function gameProjection(){
       
       var intX = arrayPlanets[i]["positionX"];
       var intY = arrayPlanets[i]["positionY"];
+
+      //select the Image for the plant
+      arrayPlanetImageNames = new Array("planet00", "planet01", "planet02", "planet03");
+      strPlanetImageName = arrayPlanetImageNames[i%4];
+
       
       //draw the planet (todo: draw a Image)
-      this.contextContext.fillRect(
-      intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/3,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
-      intY*intHexHeight*(3/4) +intHexHeight/3,//make the Rect a bit smaller.
-      intHexWidth - 2 * intHexWidth/3,//make the Rect a bit smaller.
-      intHexHeight- 2 * intHexHeight/3)//make the Rect a bit smaller.
+      this.contextContext.drawImage(
+        this.arrayImages[strPlanetImageName],
+        intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/4,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
+        intY*intHexHeight*(3/4) +intHexHeight/4,//make the Rect a bit smaller.
+        intHexWidth - 2 * intHexWidth/4,//make the Rect a bit smaller.
+        intHexHeight- 2 * intHexHeight/4)//make the Rect a bit smaller.
 
     };
+
+
+
+    //draw the troops
+    var arrayTroops = this.arrayWorldInformation["troops"]
+    for (var i = 0; i < arrayTroops.length; i++) {
+      //fit the image
+      if(arrayTroops[i]["player"] == 0){//player1 is blue and player2 is red
+        var strImageId = "troopRedSmall";
+      }else{
+        var strImageId = "troopBlueSmall";
+      }
+      
+      var intX = arrayTroops[i]["positionX"];
+      var intY = arrayTroops[i]["positionY"];
+      
+      //draw the Image
+      this.contextContext.drawImage(
+        this.arrayImages[strImageId],
+        intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+        intY*intHexHeight*(3/4),
+        intHexWidth,
+        intHexHeight)
+
+    };
+
 
 
 
@@ -344,6 +400,13 @@ function gameProjection(){
       document.getElementById("gameInfo").style.color = "blue";
     }else{
       document.getElementById("gameInfo").style.color = "red";
+    }
+
+    //show or hide end Turn button
+    if(this.arrayWorldInformation["moveOf"] == this.arrayWorldInformation["youAre"]){//player1 is blue and player2 is red
+      document.getElementById("endTurn").style.visibility = "visible";
+    }else{
+       document.getElementById("endTurn").style.visibility = "hidden";
     }
 
 
@@ -475,5 +538,5 @@ if(parseURLParams()["auto"] == "true"){
     window.moveBy(-window.outerWidth, window.outerHeight)
   }
 
-  connectToServer()
+  window.setTimeout(function(){connectToServer()}, 100);
 }

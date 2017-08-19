@@ -29,8 +29,8 @@ function Game(strName, playerHost){
 
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
-	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "moveAble" : true}
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "moveAble" : true}
+	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
+	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -77,18 +77,30 @@ function Game(strName, playerHost){
 			//let tow Troops fight; returns the winner
 			//todo: better betels with morale
 			//which one wins
-			if(arrayTroop0["size"] > arrayTroop1["size"]){//Troop0 win
+			if(arrayTroop0["size"] * arrayTroop0["morale"] > arrayTroop1["size"] * arrayTroop1["morale"]){//Troop0 win
 				arrayReturnTroop = arrayTroop0;
-				arrayTroop0["size"] = arrayTroop0["size"] - arrayTroop1["size"];//later more advanced calculation 
+				arrayTroop0["size"] = Math.round((arrayTroop0["size"] * arrayTroop0["morale"] - arrayTroop1["size"] * arrayTroop1["morale"])/arrayTroop0["morale"]);//calculate the new size
 			}else{//Troop1 win
 				arrayReturnTroop = arrayTroop1;
-				arrayTroop1["size"] = arrayTroop1["size"] - arrayTroop0["size"];//later more advanced calculation
+				arrayTroop1["size"] = Math.round((arrayTroop1["size"] * arrayTroop1["morale"] - arrayTroop0["size"] * arrayTroop0["morale"])/arrayTroop1["morale"]);//calculate the new size
 			}
-
 			return  arrayReturnTroop;
 		}else{
+			
+			intNewSize = arrayTroop0["size"] + arrayTroop1["size"]
+
+			//get the average technic Level of the troops
+			intNewTechnicLevel = ((arrayTroop0["size"] * arrayTroop0["technicLevel"]) + (arrayTroop1["size"] * arrayTroop1["technicLevel"]))/intNewSize
+
+			//get the average morale Level of the troops
+			intNewMorale = ((arrayTroop0["size"] * arrayTroop0["morale"]) + (arrayTroop1["size"] * arrayTroop1["morale"]))/intNewSize
+
 			arrayReturnTroop = arrayTroop0
-			arrayReturnTroop["size"] += arrayTroop1["size"]
+			//set the new values
+			arrayReturnTroop["size"] 			= intNewSize;
+			arrayReturnTroop["technicLevel"] 	= intNewTechnicLevel;
+			arrayReturnTroop["morale"] 			= intNewMorale;
+
 			arrayReturnTroop["moveable"] = false;
 			return arrayReturnTroop;
 		}
@@ -108,10 +120,28 @@ function Game(strName, playerHost){
     			if(this.getTroopsIdByPosition(pointPosition).length > 0){//check if there is a troop over the planet
     				//add population amount to the troop
     				var intId = this.getTroopsIdByPosition(pointPosition)[0];
-    				this.arrayWorldInformation["troops"][intId]["size"] += arrayPlanets[i]["population"]
+    				this.arrayWorldInformation["troops"][intId]["size"] += Math.round(arrayPlanets[i]["population"]);
+
+    				//increase technical level
+    				this.arrayWorldInformation["troops"][intId]["technicLevel"] += arrayPlanets[i]["knowledge"]*0.1;
+
+    				//max level is 5
+    				//todo: define by race
+    				this.arrayWorldInformation["troops"][intId]["technicLevel"] = Math.min(5, this.arrayWorldInformation["troops"][intId]["technicLevel"]);
+
+
+    				//increase morale
+    				this.arrayWorldInformation["troops"][intId]["morale"] += arrayPlanets[i]["recoveryFactor"]*0.03;
+
+    				//max level is 2.5
+    				//todo: define by race
+    				this.arrayWorldInformation["troops"][intId]["morale"] = Math.min(2.5, this.arrayWorldInformation["troops"][intId]["morale"]);
+
+
+
     			}else{
     				//spawn a new Troop
-    				arrayNewTroop = {"size": arrayPlanets[i]["population"], "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 2, "moveAble" : true};
+    				arrayNewTroop = {"size": Math.round(arrayPlanets[i]["population"]), "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 1, "morale": 1, "moveAble" : true};
     				this.arrayWorldInformation["troops"].push(arrayNewTroop);
     			}
     		}
@@ -199,7 +229,7 @@ function Game(strName, playerHost){
 			}
 
 			//test if the player trys to move a troop out of its range
-			var intTechnicLevel = this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["technicLevel"];
+			var intTechnicLevel = Math.floor(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["technicLevel"]);
 			var pointCurrentPosition = new point(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"], this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"])
 			var pointDestination = new point(arrayCommand["newX"], arrayCommand["newY"]);
 
@@ -266,6 +296,13 @@ function Game(strName, playerHost){
 
 
 			return;
+		}else if(arrayCommand["command"] == "ENDTURN"){//end the turn
+			//check if it is the Turn of the player
+			if(this.arrayWorldInformation["moveOf"] != this.arrayMyPlayers.indexOf(playerPlayer)){
+				console.log(playerPlayer.strName + " try end a Turn that isn't his.")
+				return;
+			}
+			this.nextTurn();
 		}
 
 		console.error("unknown game-command");
@@ -285,9 +322,16 @@ function Game(strName, playerHost){
 			console.log(this.getPlanetIdByPosition(pointNewPlanetAt));
 		} while(this.getPlanetIdByPosition(pointNewPlanetAt) != null)
 
-		intPopulation = 1; //todo: random
+		//per 1 Population size of troop increase by one
+		intPopulation = Math.floor(Math.random()*3*10)/10;
 
-		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation}
+		//per 1 Knowledge technical Level is increase by 0.03
+		intKnowledge = Math.floor(Math.random()*10);
+
+		// per 1 recovery factor morale is increase by 0.03;
+		intRecoveryFactor = Math.floor(Math.random()*5);
+
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge}
 	}
 
 
@@ -357,28 +401,28 @@ function update(){
 	//update the display
 
 	//clear the Window
-	document.body.innerHTML = "";
+	clearInfo();
 
 	//print the clients on the window
-	document.body.innerHTML = document.body.innerHTML + "<h3>----------------------- Player ---------------------</h3>";
+	printInfo("<h3>----------------------- Player ---------------------</h3>");
 	for (var i = 0; i < arrayAllPlayers.length; i++) {
-		document.body.innerHTML = document.body.innerHTML + i + ": " + arrayAllPlayers[i].strName + "<br>";
+		printInfo(i + ": " + arrayAllPlayers[i].strName + "<br>");
 	};
 
-	document.body.innerHTML = document.body.innerHTML + "<h3>----------------------- Games ----------------------</h3>";
+	printInfo("<h3>----------------------- Games ----------------------</h3>");
 	for (var i = 0; i < arrayAllGames.length; i++) {
-		document.body.innerHTML += i + ": " + arrayAllGames[i].strName +  " (";
+		printInfo(i + ": " + arrayAllGames[i].strName +  " (");
 
 		//display all players in the game
 		for (var x = 0; x < arrayAllGames[i].arrayMyPlayers.length; x++) {
 			if(x != 0){
-				document.body.innerHTML += "|";
+				printInfo("|");
 			}
-			document.body.innerHTML += arrayAllGames[i].arrayMyPlayers[x].strName
+			printInfo(arrayAllGames[i].arrayMyPlayers[x].strName);
 		};
-		document.body.innerHTML += ") <br>";
+		printInfo(") <br>");
 	};
-	document.body.innerHTML += "version: "+ getVersion();
+	printInfo("version: "+ getVersion());
 
 	//kick disconnected Player;
 	for (var i = 0; i < arrayAllPlayers.length; i++) {
@@ -405,7 +449,7 @@ function getLobby(){//return all Information that is needed to show the Lobby
 
 	strLobbyInformation += '"type" : "LOBBYINFO",';
 
-	strLobbyInformation += '"online" : ' + this.arrayAllPlayers.length + ',';
+	strLobbyInformation += '"online" : ' + getAmountOfConnectedClients() + ',';
 
 	strLobbyInformation += '"games" : [';
 
@@ -423,7 +467,7 @@ function getLobby(){//return all Information that is needed to show the Lobby
 	return strLobbyInformation;
 }
 
-window.setInterval(update, 100);
+callInInterval(update, 100);
 
 
 createServer();

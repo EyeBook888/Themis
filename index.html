@@ -1,15 +1,20 @@
 <html>
+<head>
+	<link rel="stylesheet" type="text/css" href="../both/style.css">
+</head>
 <body>
 
 <script language="JavaScript">require('nw.gui').Window.get().showDevTools();</script>
 
-<a href="./Client/index.html" target="_blank">open a Game</a>
+<div class="frame">
+> <a href="./Client/index.html" target="_blank">open a Game</a>
 <br>
-<a href="./Server/index.html" target="_blank">open a Server</a>
-
-<div onClick="window.open('./Server/index.html'); window.open('./Client/index.html?auto=true&id=0'); window.open('./Client/index.html?auto=true&id=1')">
-  open test environment
+> <a href="./Server/index.html" target="_blank">open a Server</a>
 </div>
+
+<br>
+<br>
+> <input type="button" onClick="window.open('./Server/index.html'); window.open('./Client/index.html?auto=true&id=0'); window.open('./Client/index.html?auto=true&id=1')" value="open test environment">
 
 </body>
 </html>
