@@ -1,4 +1,4 @@
-#Themis
+# Themis
 
 Themis is a turn-based strategy 2D space-war-game. It take place in interstellar space. It's a multi-player only game.
 
@@ -10,7 +10,7 @@ Open nwjs.exe (or nwjs.app on mac).
 
 
 
-##How to run the server?
+## How to run the server?
 
 You can run the server with NW.js by simply clicking on 'open a sever' in the "launcher".
 You can also run it with node by executing nodeStartup.js .
@@ -23,6 +23,6 @@ This project is licensed under the MIT License
 
 
 
-###Have fun playing the game!
+### Have fun playing the game!
 
 *EyeBook*
