@@ -30,7 +30,7 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 0.5 ,"moveAble" : true}
+	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
