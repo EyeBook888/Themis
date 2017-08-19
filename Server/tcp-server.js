@@ -30,6 +30,13 @@ function createServer(){
 
   		});
 
+  		socket.on('close', function() {
+    		//set the socket to not ridable
+    		intSocketId = arrayAllSockets.indexOf(this);
+    		arrayAllSockets[intSocketId] = new Array();
+    		arrayAllSockets[intSocketId].writable = false;
+		});
+
 	});
 
 	serverTcpIpServer.listen(1331);
@@ -73,6 +80,16 @@ function sendToEveryone(strText){
 	for (var i = 0; i < arrayAllSockets.length; i++) {
 		sendToSocket(i, strText)
 	};
+}
+
+function getAmountOfConnectedClients(){
+	intAmount = 0;
+	for (var i = 0; i < arrayAllSockets.length; i++) {
+		if(isConnectionToSocket(i)){
+			intAmount++;
+		}
+	};
+	return intAmount;
 }
 
 function closeServer(){

@@ -86,8 +86,21 @@ function Game(strName, playerHost){
 			}
 			return  arrayReturnTroop;
 		}else{
+			
+			intNewSize = arrayTroop0["size"] + arrayTroop1["size"]
+
+			//get the average technic Level of the troops
+			intNewTechnicLevel = ((arrayTroop0["size"] * arrayTroop0["technicLevel"]) + (arrayTroop1["size"] * arrayTroop1["technicLevel"]))/intNewSize
+
+			//get the average morale Level of the troops
+			intNewMorale = ((arrayTroop0["size"] * arrayTroop0["morale"]) + (arrayTroop1["size"] * arrayTroop1["morale"]))/intNewSize
+
 			arrayReturnTroop = arrayTroop0
-			arrayReturnTroop["size"] += arrayTroop1["size"]
+			//set the new values
+			arrayReturnTroop["size"] 			= intNewSize;
+			arrayReturnTroop["technicLevel"] 	= intNewTechnicLevel;
+			arrayReturnTroop["morale"] 			= intNewMorale;
+
 			arrayReturnTroop["moveable"] = false;
 			return arrayReturnTroop;
 		}
@@ -110,7 +123,7 @@ function Game(strName, playerHost){
     				this.arrayWorldInformation["troops"][intId]["size"] += Math.round(arrayPlanets[i]["population"]);
 
     				//increase technical level
-    				this.arrayWorldInformation["troops"][intId]["technicLevel"] += arrayPlanets[i]["knowledge"]*0.03;
+    				this.arrayWorldInformation["troops"][intId]["technicLevel"] += arrayPlanets[i]["knowledge"]*0.1;
 
     				//max level is 5
     				//todo: define by race
@@ -436,7 +449,7 @@ function getLobby(){//return all Information that is needed to show the Lobby
 
 	strLobbyInformation += '"type" : "LOBBYINFO",';
 
-	strLobbyInformation += '"online" : ' + this.arrayAllPlayers.length + ',';
+	strLobbyInformation += '"online" : ' + getAmountOfConnectedClients() + ',';
 
 	strLobbyInformation += '"games" : [';
 
