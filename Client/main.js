@@ -280,8 +280,8 @@ function gameProjection(){
     var intHexHeight = intHexWidth;
 
     //fit the canvas size (height)
-    this.canvasCanvas.height = intMapHeight * intHexHeight - intHexHeight;
-    this.canvasCanvas.style.height = (intMapHeight * intHexHeight - intHexHeight) + "px";
+    this.canvasCanvas.height = (intMapHeight*0.75) * intHexHeight + intHexHeight*0.25;
+    this.canvasCanvas.style.height = ((intMapHeight*0.75) * intHexHeight + intHexHeight*0.25) + "px";
 
 
     this.contextContext.fillStyle = "black"
