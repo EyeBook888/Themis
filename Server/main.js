@@ -29,8 +29,8 @@ function Game(strName, playerHost){
 
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
-	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "moveAble" : true}
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "moveAble" : true}
+	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
+	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 0.5 ,"moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -77,14 +77,13 @@ function Game(strName, playerHost){
 			//let tow Troops fight; returns the winner
 			//todo: better betels with morale
 			//which one wins
-			if(arrayTroop0["size"] > arrayTroop1["size"]){//Troop0 win
+			if(arrayTroop0["size"] * arrayTroop0["morale"] > arrayTroop1["size"] * arrayTroop1["morale"]){//Troop0 win
 				arrayReturnTroop = arrayTroop0;
-				arrayTroop0["size"] = arrayTroop0["size"] - arrayTroop1["size"];//later more advanced calculation 
+				arrayTroop0["size"] = Math.round((arrayTroop0["size"] * arrayTroop0["morale"] - arrayTroop1["size"] * arrayTroop1["morale"])/arrayTroop0["morale"]);//calculate the new size
 			}else{//Troop1 win
 				arrayReturnTroop = arrayTroop1;
-				arrayTroop1["size"] = arrayTroop1["size"] - arrayTroop0["size"];//later more advanced calculation
+				arrayTroop1["size"] = Math.round((arrayTroop1["size"] * arrayTroop1["morale"] - arrayTroop0["size"] * arrayTroop0["morale"])/arrayTroop1["morale"]);//calculate the new size
 			}
-
 			return  arrayReturnTroop;
 		}else{
 			arrayReturnTroop = arrayTroop0
@@ -118,10 +117,18 @@ function Game(strName, playerHost){
     				this.arrayWorldInformation["troops"][intId]["technicLevel"] = Math.min(5, this.arrayWorldInformation["troops"][intId]["technicLevel"]);
 
 
+    				//increase morale
+    				this.arrayWorldInformation["troops"][intId]["morale"] += arrayPlanets[i]["recoveryFactor"]*0.03;
+
+    				//max level is 2.5
+    				//todo: define by race
+    				this.arrayWorldInformation["troops"][intId]["morale"] = Math.min(2.5, this.arrayWorldInformation["troops"][intId]["morale"]);
+
+
 
     			}else{
     				//spawn a new Troop
-    				arrayNewTroop = {"size": Math.round(arrayPlanets[i]["population"]), "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 1, "moveAble" : true};
+    				arrayNewTroop = {"size": Math.round(arrayPlanets[i]["population"]), "player" : arrayPlanets[i]["player"], "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 1, "morale": 1, "moveAble" : true};
     				this.arrayWorldInformation["troops"].push(arrayNewTroop);
     			}
     		}
@@ -305,11 +312,13 @@ function Game(strName, playerHost){
 		//per 1 Population size of troop increase by one
 		intPopulation = Math.floor(Math.random()*3*10)/10;
 
-		//per 1 Knowledge technical Level is by 0.03
+		//per 1 Knowledge technical Level is increase by 0.03
 		intKnowledge = Math.floor(Math.random()*10);
 
+		// per 1 recovery factor morale is increase by 0.03;
+		intRecoveryFactor = Math.floor(Math.random()*5);
 
-		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "knowledge" : intKnowledge}
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge}
 	}
 
 

@@ -143,6 +143,7 @@ function gameProjection(){
       strInfoHTML+= "-- Troop --<br>";
       strInfoHTML+= "size: " + this.arrayWorldInformation["troops"][intTroopId]["size"] + "<br>";
       strInfoHTML+= "technology: " + this.arrayWorldInformation["troops"][intTroopId]["technicLevel"] + "<br>";
+      strInfoHTML+= "morale: " + this.arrayWorldInformation["troops"][intTroopId]["morale"] + "<br>";
     }
 
     
@@ -169,6 +170,8 @@ function gameProjection(){
       }else{
         strInfoHTML += "--<br>" ;
       }
+
+      strInfoHTML += "recovery factor: " + this.arrayWorldInformation["planets"][intPlanetId]["recoveryFactor"];
     }
     
     if(strInfoHTML == ""){
