@@ -344,6 +344,8 @@ function Game(strName, playerHost){
 	}
 
 	//place the planets for the game
+	//var boolMirrored = true; //to make the game more fair by mirroring the planets
+	/*
 	for( i = 0; i < this.arrayWorldInformation["planetAmount"]; i++){
 		
 		//generate position for plants until one position is find where no planet is jet
@@ -364,7 +366,49 @@ function Game(strName, playerHost){
 		// per 1 recovery factor morale is increase by 0.03;
 		intRecoveryFactor = Math.floor(Math.random()*5);
 
-		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge}
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
+	}
+
+	*/
+
+	for( i = 0; i < this.arrayWorldInformation["planetAmount"]; i+=2){
+		
+		intMiddleX = Math.floor(this.arrayWorldInformation["mapWidth"]/2);
+		
+		//generate position for plants until one position is find where no planet is jet
+		pointNewPlanetAt = new point(0, 0)
+		do {
+			pointNewPlanetAt.intX = Math.floor(Math.random()*intMiddleX)
+			pointNewPlanetAt.intY = Math.floor(Math.random()*this.arrayWorldInformation["mapHeight"])
+			console.log(pointNewPlanetAt.toString());
+			console.log(this.getPlanetIdByPosition(pointNewPlanetAt));
+		} while(this.getPlanetIdByPosition(pointNewPlanetAt) != null)
+
+		//per 1 Population size of troop increase by one
+		intPopulation = Math.floor(Math.random()*3*10)/10;
+
+		//per 1 Knowledge technical Level is increase by 0.03
+		intKnowledge = Math.floor(Math.random()*10);
+
+		// per 1 recovery factor morale is increase by 0.03;
+		intRecoveryFactor = Math.floor(Math.random()*5);
+
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
+	
+
+
+		//create the mirror planet position
+		pointNewMirrorPlanetAt = new point(0, pointNewPlanetAt.intY);
+		pointNewMirrorPlanetAt.intX = this.arrayWorldInformation["mapWidth"] - pointNewPlanetAt.intX -1;
+
+		pointNewMirrorPlanetAt.intY = this.arrayWorldInformation["mapHeight"] - pointNewPlanetAt.intY -1;
+
+		//set the planet
+		console.log("pointAt:" + pointNewMirrorPlanetAt.toString());
+		this.arrayWorldInformation["planets"][i+1] = {"player" : null, "positionX": pointNewMirrorPlanetAt.intX, "positionY": pointNewMirrorPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
+	//	console.log("pointAt:" + pointNewMirrorPlanetAt.toString());
+	
+
 	}
 
 
