@@ -189,6 +189,20 @@ function gameProjection(){
     sendToServer(strJson)
   }
 
+  //to leave the game
+  this.leaveGame = function(){
+    //send command to Server
+    strJson = '{ "type": "GAMECOMMAND", "command": "LEAVEGAME" }'
+    sendToServer(strJson);
+
+    // make Lobby visible
+    document.getElementById("lobbyUi").style.visibility = "visible"
+    document.getElementById("game").style.visibility = "hidden"
+
+    //delete this game
+    gameProjectionCurrentGame = null;
+  }
+
 
 
   this.onMouseDown = function(eventE){//the click event
@@ -393,6 +407,19 @@ function gameProjection(){
 
     //make other update stuff
 
+    //test for winner
+    if(this.arrayWorldInformation["winner"] != null){
+
+      if(this.arrayWorldInformation["winner"] == this.arrayWorldInformation["youAre"]){
+        document.getElementById("winOrLoose").innerHTML = "You are the winner"
+        document.getElementById("GameEndScreen").style.visibility = "visible"
+      }else{
+        document.getElementById("winOrLoose").innerHTML = "You are the looser"
+        document.getElementById("GameEndScreen").style.visibility = "visible"
+      }
+
+    }
+
     //show the time to the next move
     document.getElementById("gameInfo").innerHTML = Math.floor(this.arrayWorldInformation["timeToNextTurn"]) + "s"
 
@@ -414,8 +441,13 @@ function gameProjection(){
 
 
 
-  window.setInterval(function(){gameProjectionCurrentGame.draw()}, 100);
 }
+
+window.setInterval(function(){
+    if(gameProjectionCurrentGame != null){
+      gameProjectionCurrentGame.draw()
+   }
+  }, 100);
 
 
 

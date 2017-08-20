@@ -27,6 +27,10 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["timePerTurn"] = 30;
 	this.arrayWorldInformation["timeToNextTurn"] = this.arrayWorldInformation["timePerTurn"];
 
+
+	this.arrayWorldInformation["winner"] = null;
+
+
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
@@ -295,6 +299,29 @@ function Game(strName, playerHost){
 			}
 
 
+			//test if that was the win turn
+
+			//count the troops of each Player
+			var intTroopAmounts = new Array();
+			
+			//set the start value to 0
+			for (var i = 0; i < this.arrayMyPlayers.length; i++) {
+				intTroopAmounts[i] = 0;
+			};
+			
+			//count
+			for (var i = 0; i < this.arrayWorldInformation["troops"].length; i++) {
+				intTroopAmounts[this.arrayWorldInformation["troops"][i]["player"]] ++ ;
+			};
+
+			//set the winner
+			if(intTroopAmounts[0] <= 0){
+				this.arrayWorldInformation["winner"] = 1;
+			}else if(intTroopAmounts[1] <= 0){
+				this.arrayWorldInformation["winner"] = 0;
+			}
+
+
 			return;
 		}else if(arrayCommand["command"] == "ENDTURN"){//end the turn
 			//check if it is the Turn of the player
@@ -303,6 +330,12 @@ function Game(strName, playerHost){
 				return;
 			}
 			this.nextTurn();
+			return;
+
+		}else if(arrayCommand["command"] == "LEAVEGAME"){//let one player leave the Game
+			intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
+			this.arrayMyPlayers[intPlayerId] = null;//set the game for this player to null
+			playerPlayer.gameMyGame = null;
 		}
 
 		console.error("unknown game-command");
@@ -415,10 +448,14 @@ function update(){
 
 		//display all players in the game
 		for (var x = 0; x < arrayAllGames[i].arrayMyPlayers.length; x++) {
+			
 			if(x != 0){
 				printInfo("|");
 			}
-			printInfo(arrayAllGames[i].arrayMyPlayers[x].strName);
+			if(arrayAllGames[i].arrayMyPlayers[x] != null){
+				printInfo(arrayAllGames[i].arrayMyPlayers[x].strName);
+			}
+
 		};
 		printInfo(") <br>");
 	};
