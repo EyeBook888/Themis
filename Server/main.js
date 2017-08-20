@@ -196,16 +196,18 @@ function Game(strName, playerHost){
 	this.sendUpdate = function(){
 
 		for (var i = 0; i < this.arrayMyPlayers.length; i++) {//take every Player
-			//get the Player Id
-			intPlayerId = arrayAllPlayers.indexOf(this.arrayMyPlayers[i]);
+			if(this.arrayMyPlayers[i] != null){//set only if the client isn't null
+				//get the Player Id
+				intPlayerId = arrayAllPlayers.indexOf(this.arrayMyPlayers[i]);
 
-			//change the Information so that the player know who he is
-			this.arrayWorldInformation["youAre"] = i;
+				//change the Information so that the player know who he is
+				this.arrayWorldInformation["youAre"] = i;
 
-			var strWorldInformation = JSON.stringify(this.arrayWorldInformation);
+				var strWorldInformation = JSON.stringify(this.arrayWorldInformation);
 
-			//send him the new version of the game information
-			sendToSocket(intPlayerId, strWorldInformation)
+				//send him the new version of the game information
+				sendToSocket(intPlayerId, strWorldInformation)
+			}
 		};
 
 	}
@@ -336,6 +338,10 @@ function Game(strName, playerHost){
 			intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
 			this.arrayMyPlayers[intPlayerId] = null;//set the game for this player to null
 			playerPlayer.gameMyGame = null;
+		}else if(arrayCommand["command"] == "SURRENDER"){//let one player leave the Game
+			var intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
+			intPlayerId = (intPlayerId+1)%2//get the opposite player
+			this.arrayWorldInformation["winner"] = intPlayerId;
 		}
 
 		console.error("unknown game-command");

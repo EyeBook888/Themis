@@ -203,6 +203,11 @@ function gameProjection(){
     gameProjectionCurrentGame = null;
   }
 
+  //to surrender
+  this.surrender = function(){
+    strJson = '{ "type": "GAMECOMMAND", "command": "SURRENDER" }'
+    sendToServer(strJson);//send command to Server
+  }
 
 
   this.onMouseDown = function(eventE){//the click event
@@ -479,6 +484,7 @@ function createGame(){
 
 
 
+
 function interpretMessage(strMessage){
 
   //console.log(strMessage);
@@ -507,10 +513,7 @@ function interpretMessage(strMessage){
   else if(arrayCommand["type"] == "WORLDINFO"){
     
     if(gameProjectionCurrentGame == null){//Create the new game
-      gameProjectionCurrentGame = new gameProjection()
-      // set the move and click event
-      gameProjectionCurrentGame.canvasCanvas.addEventListener("mousemove", function(e){gameProjectionCurrentGame.onMouseMove(e)}, false);
-      gameProjectionCurrentGame.canvasCanvas.addEventListener("click", function(e){gameProjectionCurrentGame.onMouseDown(e)}, false);
+      gameProjectionCurrentGame = new gameProjection()      
     }
 
     //change the worldinfos
@@ -526,6 +529,8 @@ function interpretMessage(strMessage){
 
 functionOnMessage = interpretMessage;
 //override the default "OnMessage"-function
+
+
 
 
 //set the version
@@ -571,4 +576,11 @@ if(parseURLParams()["auto"] == "true"){
   }
 
   window.setTimeout(function(){connectToServer()}, 100);
+}
+
+
+window.onload = function(){
+  // set the move and click event 
+  document.getElementById("gameBoard").addEventListener("mousemove", function(e){gameProjectionCurrentGame.onMouseMove(e)}, false);
+  document.getElementById("gameBoard").addEventListener("click", function(e){gameProjectionCurrentGame.onMouseDown(e)}, false);
 }
