@@ -38,12 +38,22 @@ function Game(strName, playerHost){
 
 	this.arrayWorldInformation["planets"] = new Array();
 
+	//for the jump animation
+	this.arrayWorldInformation["animation"] = new Array();
+	// { type : "JUMP", startTime : 123, "ShipId" : 1, startPositionX : 0, star PositionY : 0}
+
+	//to keep the time in singe with the players
+	this.arrayWorldInformation["pastTime"] = 0;
+
 
 
 	this.joinPlayer = function(playerPlayer){
 		console.log(playerPlayer)
 		this.arrayMyPlayers[1] = playerPlayer;
 		this.arrayMyPlayers[1].gameMyGame = this;//register this Game at the 2ed Player
+
+		//set the startTime
+		this.intGameStartedAt = new Date().getTime();
 
 		this.sendUpdate();
 	}
@@ -180,13 +190,14 @@ function Game(strName, playerHost){
 
 			this.nextTurn();
 
-
-
 			//set all troops back to moveable
 			for (var i = 0; i < this.arrayWorldInformation["troops"].length; i++) {
 				this.arrayWorldInformation["troops"][i]["moveAble"] = true;
 			};
 		}
+
+		//update past time (to sing with the client)
+		this.arrayWorldInformation["pastTime"] = new Date().getTime() - this.intGameStartedAt;
 
 		this.sendUpdate();
 	}
@@ -244,12 +255,16 @@ function Game(strName, playerHost){
 				return;
 			}
 
-			//make the move
+			//set the animation
+			console.log(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]);
+			intStartTime = new Date().getTime() - this.intGameStartedAt 
+			this.arrayWorldInformation["animation"].push({ type : "JUMP",  startTime : intStartTime, "shipId" : arrayCommand["troopId"], "startPositionX" : this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"], "startPositionY" : this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]});
 
+
+			//make the move
 			this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"] = arrayCommand["newX"];
 			this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"] = arrayCommand["newY"];
 			this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["moveAble"] = false;//the troop can only move once
-
 
 			//test if there are more than one troop on the field ...
 			var arrayTroopIdOnField = this.getTroopsIdByPosition(new point(arrayCommand["newX"], arrayCommand["newY"]));
@@ -269,7 +284,6 @@ function Game(strName, playerHost){
 				console.log(arrayNewTroop);
 				
 				//remove the old troops 
-				//BUG: same how the wrong troop get cut off
 				console.log("troop0: ");
 				console.log(arrayTroopOnField[0]);
 				

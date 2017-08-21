@@ -11,6 +11,9 @@ function gameProjection(){
   this.pointHover = new point(0, 0);
   this.pointSelection = new point(-1, -1);//a negative value means no selection
 
+  this.intGameStartedAt = new Date().getTime();// to measure the time since the game has started
+  //a proximity the time since this gameProjection was created, but the real time is coming from the Server
+
 
   //load the needed images
   this.arrayImages = new Array();
@@ -284,9 +287,21 @@ function gameProjection(){
       };
     };
   }
-
+  floatTimer = 0;
 
   this.draw = function(){
+
+    //calculate the time
+    var intPastTime = this.arrayWorldInformation["pastTime"];
+    //calculate back the starting time
+    var intStartTime = (new Date().getTime()) - intPastTime;
+    //if the time is older than the a proximate start time: replace it because you have a better connection now.
+    if(this.intGameStartedAt >= intStartTime){
+      this.intGameStartedAt = intStartTime;
+    }
+
+
+
 
     //fit the canvas size (width)
     this.canvasCanvas.width = this.canvasCanvas.offsetWidth;
@@ -387,6 +402,19 @@ function gameProjection(){
     //draw the troops
     var arrayTroops = this.arrayWorldInformation["troops"]
     for (var i = 0; i < arrayTroops.length; i++) {
+      //check if this ship has an animation
+      intAnimationId = null;
+      for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+        intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (this.arrayWorldInformation["animation"][a]["startTime"]);
+        //if the ship has an animation that is less than 1 sec old
+        if(this.arrayWorldInformation["animation"][a]["shipId"] == i && intAnimationRuntime <= 1000){
+          //this.arrayWorldInformation["troops"]["animation"][a]["startTime"] - (new Date().getTime()) <= 1000
+          console.log(( intAnimationRuntime ) + " old animation" )
+          intAnimationId = a;
+        }
+      };
+
+
       //fit the image
       if(arrayTroops[i]["player"] == 0){//player1 is blue and player2 is red
         var strImageId = "troopRedSmall";
@@ -397,6 +425,7 @@ function gameProjection(){
       var intX = arrayTroops[i]["positionX"];
       var intY = arrayTroops[i]["positionY"];
       
+      if(intAnimationId == null){//only if there is no animation
       //draw the Image
       this.contextContext.drawImage(
         this.arrayImages[strImageId],
@@ -404,8 +433,25 @@ function gameProjection(){
         intY*intHexHeight*(3/4),
         intHexWidth,
         intHexHeight)
+      }else{
+        //draw the jump
+
+        floatTimer = (((new Date().getTime()) - this.intGameStartedAt ) - this.arrayWorldInformation["animation"][intAnimationId]["startTime"])  / 1000; //get time for animation 
+        pointFrom = new point(this.arrayWorldInformation["animation"][intAnimationId]["startPositionX"], this.arrayWorldInformation["animation"][intAnimationId]["startPositionY"])//get Start position
+
+        if(arrayTroops[i]["player"] == 0){
+          //red faced to the right
+          this.drawRightJump(pointFrom, new point(intX, intY), this.arrayImages[strImageId], floatTimer)
+        }else{
+          //red faced to the left
+          this.drawLeftJump(pointFrom, new point(intX, intY), this.arrayImages[strImageId], floatTimer)
+        }
+
+      }
 
     };
+
+  
 
 
 
@@ -444,6 +490,126 @@ function gameProjection(){
 
   }
 
+  this.drawLeftJump = function(pointJumpOffPosition, pointJumpInPosition, imageShip, floatTimer){ //beam the ship
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+    //jumping out
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer*3));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpOffPosition.intX*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2) - ((1-floatDimensionFactor.intX)*intHexWidth),//every 2ed line has to be a bit more to the right
+      pointJumpOffPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpOffPosition.intX-1)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
+        pointJumpOffPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+
+
+    //jumping in
+    var strImageId = "troopBlueSmall";
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer*3)-1, 0));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpInPosition.intX*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2) + ((1-floatDimensionFactor.intX)*intHexWidth)*2,//every 2ed line has to be a bit more to the right
+      pointJumpInPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpInPosition.intX+2)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
+        pointJumpInPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+  }
+
+
+
+this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageShip, floatTimer){ //beam the ship
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+    //jumping out
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer*3));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpOffPosition.intX*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2) + ((1-floatDimensionFactor.intX)*intHexWidth)*2,//every 2ed line has to be a bit more to the right
+      pointJumpOffPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpOffPosition.intX+2)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
+        pointJumpOffPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+
+
+    //jumping in
+    var strImageId = "troopBlueSmall";
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer*3)-1, 0));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpInPosition.intX*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2) - ((1-floatDimensionFactor.intX)*intHexWidth),//every 2ed line has to be a bit more to the right
+      pointJumpInPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpInPosition.intX-1)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
+        pointJumpInPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+  }
+
 
 
 }
@@ -452,7 +618,7 @@ window.setInterval(function(){
     if(gameProjectionCurrentGame != null){
       gameProjectionCurrentGame.draw()
    }
-  }, 100);
+  }, 20);
 
 
 
