@@ -730,7 +730,7 @@ function parseURLParams() {
     }
     return parms;
 }
-
+if(parseURLParams() != null){
 if(parseURLParams()["auto"] == "true"){
   strId = parseURLParams()["id"];
 
@@ -746,7 +746,7 @@ if(parseURLParams()["auto"] == "true"){
 
   window.setTimeout(function(){connectToServer()}, 100);
 }
-
+}
 
 window.onload = function(){
   // set the move and click event 
