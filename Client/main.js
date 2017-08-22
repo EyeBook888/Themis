@@ -14,6 +14,9 @@ function gameProjection(){
   this.intGameStartedAt = new Date().getTime();// to measure the time since the game has started
   //a proximity the time since this gameProjection was created, but the real time is coming from the Server
 
+  this.humanCivilization = new humanCivilization();// from both/civilization
+  //at the moment just one civilization
+
 
   //load the needed images
   this.arrayImages = new Array();
@@ -29,12 +32,6 @@ function gameProjection(){
   
   this.arrayImages["planet03"] = new Image();
   this.arrayImages["planet03"].src = "../Images/planet03.png"
-  //troops
-  this.arrayImages["troopRedSmall"] = new Image();
-  this.arrayImages["troopRedSmall"].src = "../Images/troopRedSmall.png"
-
-    this.arrayImages["troopBlueSmall"] = new Image();
-  this.arrayImages["troopBlueSmall"].src = "../Images/troopBlueSmall.png"
 
 
 
@@ -403,53 +400,59 @@ function gameProjection(){
     var arrayTroops = this.arrayWorldInformation["troops"]
     for (var i = 0; i < arrayTroops.length; i++) {
       //check if this ship has an animation
-      intAnimationId = null;
+      boolHasAnimation = false;
       for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
         intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (this.arrayWorldInformation["animation"][a]["startTime"]);
         //if the ship has an animation that is less than 1 sec old
         if(this.arrayWorldInformation["animation"][a]["shipId"] == i && intAnimationRuntime <= 1000){
-          //this.arrayWorldInformation["troops"]["animation"][a]["startTime"] - (new Date().getTime()) <= 1000
-          console.log(( intAnimationRuntime ) + " old animation" )
-          intAnimationId = a;
+          boolHasAnimation = true;
         }
       };
 
 
-      //fit the image
-      if(arrayTroops[i]["player"] == 0){//player1 is blue and player2 is red
-        var strImageId = "troopRedSmall";
-      }else{
-        var strImageId = "troopBlueSmall";
-      }
-      
       var intX = arrayTroops[i]["positionX"];
       var intY = arrayTroops[i]["positionY"];
       
-      if(intAnimationId == null){//only if there is no animation
+      if(!boolHasAnimation){//only if there is no animation
       //draw the Image
       this.contextContext.drawImage(
-        this.arrayImages[strImageId],
+        this.humanCivilization.getTroopImage(arrayTroops[i]),
         intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
         intY*intHexHeight*(3/4),
         intHexWidth,
         intHexHeight)
-      }else{
-        //draw the jump
-
-        floatTimer = (((new Date().getTime()) - this.intGameStartedAt ) - this.arrayWorldInformation["animation"][intAnimationId]["startTime"])  / 1000; //get time for animation 
-        pointFrom = new point(this.arrayWorldInformation["animation"][intAnimationId]["startPositionX"], this.arrayWorldInformation["animation"][intAnimationId]["startPositionY"])//get Start position
-
-        if(arrayTroops[i]["player"] == 0){
-          //red faced to the right
-          this.drawRightJump(pointFrom, new point(intX, intY), this.arrayImages[strImageId], floatTimer)
-        }else{
-          //red faced to the left
-          this.drawLeftJump(pointFrom, new point(intX, intY), this.arrayImages[strImageId], floatTimer)
-        }
-
       }
 
     };
+
+
+
+    //draw all animations
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 1000){
+          //draw the jump
+          var floatTimer  = intAnimationRuntime / 1000; //get time for animation 
+          var pointFrom   = new point(objCurrentAnimation["startPositionX"], objCurrentAnimation["startPositionY"])//get Start position
+          var pointTo     = new point(objCurrentAnimation["troop"]["positionX"], objCurrentAnimation["troop"]["positionY"]);// get the end position
+          var imageTroop  = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
+  
+
+          if(objCurrentAnimation["troop"]["player"] == 0){
+            //red faced to the right
+            this.drawRightJump(pointFrom, pointTo, imageTroop, floatTimer)
+          }else{
+           //red faced to the left
+           this.drawLeftJump(pointFrom, pointTo, imageTroop, floatTimer)
+          }
+
+        }
+    }
+
+
 
   
 

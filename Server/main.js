@@ -10,6 +10,7 @@ function Game(strName, playerHost){
 	this.arrayMyPlayers 	= new Array();
 
 
+
 	this.arrayMyPlayers[0] = playerHost;
 	this.arrayMyPlayers[0].gameMyGame = this;//register this Game at the HostPlayer
 
@@ -254,11 +255,11 @@ function Game(strName, playerHost){
 				console.warn(playerPlayer.strName + " try move a troop out of its range.");
 				return;
 			}
-
-			//set the animation
-			console.log(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]);
-			intStartTime = new Date().getTime() - this.intGameStartedAt 
-			this.arrayWorldInformation["animation"].push({ type : "JUMP",  startTime : intStartTime, "shipId" : arrayCommand["troopId"], "startPositionX" : this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"], "startPositionY" : this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]});
+			
+			//save for the animation
+			var pointStartPosition 	= new point(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"], this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"])
+			var intTroopId 			= arrayCommand["troopId"];
+			var arrayMovedTroop 	= this.arrayWorldInformation["troops"][arrayCommand["troopId"]];
 
 
 			//make the move
@@ -299,8 +300,22 @@ function Game(strName, playerHost){
 				//add the new Troop
 				this.arrayWorldInformation["troops"].push(arrayNewTroop);
 
+				if(arrayNewTroop["player"] == this.arrayMyPlayers.indexOf(playerPlayer)){
+					//means that the troop that had moved has won
+					//and now the troop id is change
+					intTroopId = this.arrayWorldInformation["troops"].length-1;//because it is now always the last ship in the array
+				}else{
+					intTroopId = null; //because the ship don't exist any more.
+				}
+
 				//console.log(this.arrayWorldInformation["troops"])
 			}
+
+			//set the animation
+			console.log(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]);
+			intStartTime = new Date().getTime() - this.intGameStartedAt 
+			this.arrayWorldInformation["animation"].push({ type : "JUMP",  "startTime" : intStartTime, "shipId" : intTroopId, "startPositionX" : pointStartPosition.intX, "startPositionY" : pointStartPosition.intY, "troop" : arrayMovedTroop});
+			//shipId is for blocking the normal draw of the ship and troop all Information for drawing it
 
 
 			//if there is a planet
