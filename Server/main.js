@@ -35,7 +35,9 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 2, "positionY": 2, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+
+	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -308,13 +310,19 @@ function Game(strName, playerHost){
 					intTroopId = null; //because the ship don't exist any more.
 				}
 
+				//alert("to hear");
+
+				//set Fight animation
+				intStartTime = new Date().getTime() - this.intGameStartedAt 
+				this.arrayWorldInformation["animation"].push({ "type" : "FIGHT", "positionX" : arrayCommand["newX"], "positionY" : arrayCommand["newY"], "startTime" : intStartTime}); 
+
 				//console.log(this.arrayWorldInformation["troops"])
 			}
 
 			//set the animation
 			console.log(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]);
 			intStartTime = new Date().getTime() - this.intGameStartedAt 
-			this.arrayWorldInformation["animation"].push({ type : "JUMP",  "startTime" : intStartTime, "shipId" : intTroopId, "startPositionX" : pointStartPosition.intX, "startPositionY" : pointStartPosition.intY, "troop" : arrayMovedTroop});
+			this.arrayWorldInformation["animation"].push({ "type" : "JUMP",  "startTime" : intStartTime, "shipId" : intTroopId, "startPositionX" : pointStartPosition.intX, "startPositionY" : pointStartPosition.intY, "troop" : arrayMovedTroop});
 			//shipId is for blocking the normal draw of the ship and troop all Information for drawing it
 
 

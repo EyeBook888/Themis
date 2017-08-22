@@ -18,6 +18,9 @@ function gameProjection(){
   //at the moment just one civilization
 
 
+  this.intAnimationTime = 333;
+
+
   //load the needed images
   this.arrayImages = new Array();
   //planets
@@ -433,9 +436,9 @@ function gameProjection(){
       //calculate oldness
       intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
       //if an animation that is less than 1 sec old
-        if(intAnimationRuntime <= 1000){
+        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "JUMP"){// --- a jumping ship
           //draw the jump
-          var floatTimer  = intAnimationRuntime / 1000; //get time for animation 
+          var floatTimer  = intAnimationRuntime; //get time for animation 
           var pointFrom   = new point(objCurrentAnimation["startPositionX"], objCurrentAnimation["startPositionY"])//get Start position
           var pointTo     = new point(objCurrentAnimation["troop"]["positionX"], objCurrentAnimation["troop"]["positionY"]);// get the end position
           var imageTroop  = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
@@ -449,7 +452,16 @@ function gameProjection(){
            this.drawLeftJump(pointFrom, pointTo, imageTroop, floatTimer)
           }
 
+        }else if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "FIGHT"){//draw a fight
+          //draw the jump
+          //console.log("fight");
+          var floatTimer    = Math.max(intAnimationRuntime - this.intAnimationTime*2, -0.1); //get time for animation 
+          var pointPosition = new point(objCurrentAnimation["positionX"], objCurrentAnimation["positionY"]);
+
+          this.drawFight(pointPosition, floatTimer);
+
         }
+        //console.log(objCurrentAnimation["type"])
     }
 
 
@@ -504,7 +516,7 @@ function gameProjection(){
     //jumping out
     var floatDimensionFactor = new point(0, 0);
     floatDimensionFactor.intY = 1;
-    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer*3));
+    floatDimensionFactor.intX = Math.max(0, 1 - ((floatTimer/this.intAnimationTime)));
 
     //the speeding up Spaceship
     this.contextContext.drawImage(
@@ -515,7 +527,7 @@ function gameProjection(){
       intHexHeight * floatDimensionFactor.intY)
 
     //the "flash"
-    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
       this.contextContext.fillStyle = "white";
       this.contextContext.fillRect(
         ((pointJumpOffPosition.intX-1)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
@@ -530,7 +542,7 @@ function gameProjection(){
     var strImageId = "troopBlueSmall";
     var floatDimensionFactor = new point(0, 0);
     floatDimensionFactor.intY = 1;
-    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer*3)-1, 0));
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer/this.intAnimationTime)-1, 0));
 
     //the speeding up Spaceship
     this.contextContext.drawImage(
@@ -541,7 +553,7 @@ function gameProjection(){
       intHexHeight * floatDimensionFactor.intY)
 
     //the "flash"
-    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
       this.contextContext.fillStyle = "white";
       this.contextContext.fillRect(
         ((pointJumpInPosition.intX+2)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
@@ -565,7 +577,7 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
     //jumping out
     var floatDimensionFactor = new point(0, 0);
     floatDimensionFactor.intY = 1;
-    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer*3));
+    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer/this.intAnimationTime));
 
     //the speeding up Spaceship
     this.contextContext.drawImage(
@@ -576,7 +588,7 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
       intHexHeight * floatDimensionFactor.intY)
 
     //the "flash"
-    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
       this.contextContext.fillStyle = "white";
       this.contextContext.fillRect(
         ((pointJumpOffPosition.intX+2)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
@@ -591,7 +603,7 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
     var strImageId = "troopBlueSmall";
     var floatDimensionFactor = new point(0, 0);
     floatDimensionFactor.intY = 1;
-    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer*3)-1, 0));
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer/this.intAnimationTime)-1, 0));
 
     //the speeding up Spaceship
     this.contextContext.drawImage(
@@ -602,7 +614,7 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
       intHexHeight * floatDimensionFactor.intY)
 
     //the "flash"
-    if(floatTimer >= 0.4 && floatTimer <= 0.5){
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
       this.contextContext.fillStyle = "white";
       this.contextContext.fillRect(
         ((pointJumpInPosition.intX-1)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
@@ -613,6 +625,71 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
     }
   }
 
+
+  this.drawFight = function(pointPosition, floatTimer){
+
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+
+
+    this.contextContext.fillStyle = "rgba(0,0,0,0)";
+    this.contextContext.strokeStyle = "rgba(0,0,0,0)";
+
+
+    if(floatTimer <= this.intAnimationTime && floatTimer >= 0){
+      var intResolution = 10;//draw 4 circles on top of each other
+
+      //draw a screen wide flash
+      if(Math.random() >= 0.9){
+       this.contextContext.fillStyle = "white";
+       this.contextContext.strokeStyle = "red";
+       this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height);
+      }
+
+
+
+
+
+      var r = 0;
+      var g = 0;
+      var b = 0;
+      var a = 0;
+
+      if(Math.random() >= 0.9){
+        var r = 200;
+        var g = 0;
+        var b = 0;
+        var a = 1;
+      }
+      if(Math.random() >= 0.9){
+        var r = 0;
+        var g = 0;
+        var b = 200;
+        var a = 1;
+      }
+
+      for (var c = 0; c < intResolution; c++) {
+
+        this.contextContext.fillStyle = "rgba(" + r+ ", " +  g +"," + b + "," + (a/intResolution) + ")";
+        this.contextContext.strokeStyle = "rgba(" + r+ ", " +  g +"," + b + "," + (a/intResolution) + ")";;
+
+        this.contextContext.beginPath()
+        this.contextContext.arc(
+          pointPosition.intX*intHexWidth + intHexWidth/2 + (pointPosition.intY%2)*intHexWidth/2,
+          pointPosition.intY*intHexHeight*(3/4) + intHexHeight/2,
+          intHexWidth*3 * (c/intResolution),
+          0*Math.PI,2*Math.PI)
+        this.contextContext.stroke()
+        this.contextContext.fill()
+      }
+    }
+
+  }
 
 
 }
