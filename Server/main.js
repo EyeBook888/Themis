@@ -35,9 +35,12 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 2, "positionY": 2, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
-	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+
+	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 1, "positionX": 2, "positionY": 2, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+
+	this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 0, "positionX": 1, "positionY": 1, "technicLevel" : 3, "morale": 1, "moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -312,9 +315,11 @@ this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX":
 
 				//alert("to hear");
 
-				//set Fight animation
-				intStartTime = new Date().getTime() - this.intGameStartedAt 
-				this.arrayWorldInformation["animation"].push({ "type" : "FIGHT", "positionX" : arrayCommand["newX"], "positionY" : arrayCommand["newY"], "startTime" : intStartTime}); 
+				if(arrayTroopOnField[0]["player"] != arrayTroopOnField[1]["player"]){//because only if they belong to different player is a fight
+					//set Fight animation
+					intStartTime = new Date().getTime() - this.intGameStartedAt 
+					this.arrayWorldInformation["animation"].push({ "type" : "FIGHT", "positionX" : arrayCommand["newX"], "positionY" : arrayCommand["newY"], "startTime" : intStartTime});
+				}
 
 				//console.log(this.arrayWorldInformation["troops"])
 			}

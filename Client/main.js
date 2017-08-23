@@ -36,6 +36,32 @@ function gameProjection(){
   this.arrayImages["planet03"] = new Image();
   this.arrayImages["planet03"].src = "../Images/planet03.png"
 
+  this.arrayImages["explosion0"] = new Image();
+  this.arrayImages["explosion0"].src = "../Images/explosion0.png"
+
+  this.arrayImages["explosion1"] = new Image();
+  this.arrayImages["explosion1"].src = "../Images/explosion1.png"
+
+  this.arrayImages["explosion2"] = new Image();
+  this.arrayImages["explosion2"].src = "../Images/explosion2.png"
+
+  this.arrayImages["explosion3"] = new Image();
+  this.arrayImages["explosion3"].src = "../Images/explosion3.png"
+
+  this.arrayImages["explosion4"] = new Image();
+  this.arrayImages["explosion4"].src = "../Images/explosion4.png"
+
+  this.arrayImages["explosion5"] = new Image();
+  this.arrayImages["explosion5"].src = "../Images/explosion5.png"
+
+  this.arrayImages["explosion6"] = new Image();
+  this.arrayImages["explosion6"].src = "../Images/explosion6.png"
+
+  this.arrayImages["explosion7"] = new Image();
+  this.arrayImages["explosion7"].src = "../Images/explosion7.png"
+
+  this.arrayImages["explosion8"] = new Image();
+  this.arrayImages["explosion8"].src = "../Images/explosion8.png"
 
 
   intTestDistance = 2;
@@ -387,7 +413,7 @@ function gameProjection(){
       strPlanetImageName = arrayPlanetImageNames[i%4];
 
       
-      //draw the planet (todo: draw a Image)
+      //draw the planet
       this.contextContext.drawImage(
         this.arrayImages[strPlanetImageName],
         intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/4,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
@@ -428,9 +454,31 @@ function gameProjection(){
 
     };
 
+    /*
+    //draw all dummys
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "JUMP"){// --- a jumping ship
+          //draw the jump
+          var floatTimer  = intAnimationRuntime; //get time for animation 
+          var imageTroop  = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
+  
+
+          
+          this.drawTroopDummy(pointFrom, pointTo, imageTroop, floatTimer)
+         
+
+        }
+    }
+    */
 
 
-    //draw all animations
+
+
+    //draw all jump animations
     for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
       var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
       //calculate oldness
@@ -452,7 +500,17 @@ function gameProjection(){
            this.drawLeftJump(pointFrom, pointTo, imageTroop, floatTimer)
           }
 
-        }else if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "FIGHT"){//draw a fight
+        }
+    }
+
+
+    //draw all fight animations
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "FIGHT"){//draw a fight
           //draw the jump
           //console.log("fight");
           var floatTimer    = Math.max(intAnimationRuntime - this.intAnimationTime*2, -0.1); //get time for animation 
@@ -461,15 +519,12 @@ function gameProjection(){
           this.drawFight(pointPosition, floatTimer);
 
         }
-        //console.log(objCurrentAnimation["type"])
     }
 
 
 
-  
 
-
-
+    //this.drawFight(new point(5, 5), ((new Date().getTime()) - this.intGameStartedAt )%3000);
 
     //make other update stuff
 
@@ -641,35 +696,26 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
     this.contextContext.strokeStyle = "rgba(0,0,0,0)";
 
 
-    if(floatTimer <= this.intAnimationTime && floatTimer >= 0){
+    if(floatTimer <= this.intAnimationTime/2 && floatTimer >= 0){ //first draw flashes form laserguns
       var intResolution = 10;//draw 4 circles on top of each other
-
+/*
       //draw a screen wide flash
       if(Math.random() >= 0.9){
        this.contextContext.fillStyle = "white";
        this.contextContext.strokeStyle = "red";
        this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height);
       }
-
-
-
-
+      */
 
       var r = 0;
       var g = 0;
       var b = 0;
       var a = 0;
 
-      if(Math.random() >= 0.9){
-        var r = 200;
-        var g = 0;
-        var b = 0;
-        var a = 1;
-      }
-      if(Math.random() >= 0.9){
-        var r = 0;
-        var g = 0;
-        var b = 200;
+      if(Math.random() >= 0.6){
+        var r = 255;
+        var g = 255;
+        var b = 255;
         var a = 1;
       }
 
@@ -687,7 +733,29 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
         this.contextContext.stroke()
         this.contextContext.fill()
       }
+    }else if(floatTimer <= this.intAnimationTime && floatTimer >= this.intAnimationTime/2){//draw the explosion
+      arrayExplosionImagesIds = ["explosion0", "explosion1", "explosion2", "explosion3", "explosion4", "explosion5", "explosion6", "explosion7", "explosion8"];
+      
+      var intTotalTime    = this.intAnimationTime/2;
+      var intTimePerImage = intTotalTime/arrayExplosionImagesIds.length;
+      var intCurrentTime  = floatTimer - this.intAnimationTime/2;
+
+      var intImageId      = Math.floor(intCurrentTime/intTimePerImage);
+      var strImageId      = arrayExplosionImagesIds[intImageId];
+      console.log(strImageId);
+      try{
+        this.contextContext.drawImage(
+         this.arrayImages[strImageId],
+         pointPosition.intX*intHexWidth + (pointPosition.intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+         pointPosition.intY*intHexHeight*(3/4),
+         intHexWidth,
+          intHexHeight)
+      }catch(error){
+
+      }
+
     }
+
 
   }
 
