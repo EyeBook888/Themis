@@ -454,26 +454,6 @@ function gameProjection(){
 
     };
 
-    /*
-    //draw all dummys
-    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
-      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
-      //calculate oldness
-      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
-      //if an animation that is less than 1 sec old
-        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "JUMP"){// --- a jumping ship
-          //draw the jump
-          var floatTimer  = intAnimationRuntime; //get time for animation 
-          var imageTroop  = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
-  
-
-          
-          this.drawTroopDummy(pointFrom, pointTo, imageTroop, floatTimer)
-         
-
-        }
-    }
-    */
 
 
 
@@ -502,6 +482,30 @@ function gameProjection(){
 
         }
     }
+
+    
+    //draw all dummys
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 2*this.intAnimationTime && objCurrentAnimation["type"] == "DUMMY"){ // draw a fake ship
+          //the ship
+          var imageTroop    = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
+          var pointPosition = new point(objCurrentAnimation["positionX"], objCurrentAnimation["positionY"])
+
+          //draw the Image
+          this.contextContext.drawImage(
+            imageTroop,
+            pointPosition.intX*intHexWidth + (pointPosition.intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+            pointPosition.intY*intHexHeight*(3/4),
+            intHexWidth,
+            intHexHeight)
+        }
+    }
+    console.log("end Dummy");
+
 
 
     //draw all fight animations

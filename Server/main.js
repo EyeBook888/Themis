@@ -38,10 +38,6 @@ function Game(strName, playerHost){
 
 	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
-	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 1, "positionX": 2, "positionY": 2, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
-
-	this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 0, "positionX": 1, "positionY": 1, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-
 	this.arrayWorldInformation["planets"] = new Array();
 
 	//for the jump animation
@@ -267,6 +263,7 @@ function Game(strName, playerHost){
 			var arrayMovedTroop 	= this.arrayWorldInformation["troops"][arrayCommand["troopId"]];
 
 
+
 			//make the move
 			this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionX"] = arrayCommand["newX"];
 			this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"] = arrayCommand["newY"];
@@ -295,6 +292,19 @@ function Game(strName, playerHost){
 				
 				console.log("troop1: ");
 				console.log(arrayTroopOnField[1]);
+
+				//place a dummy the troop that has not been moved
+				
+				if(arrayTroopOnField[0] == arrayMovedTroop){
+					//troop one hasn't moved
+					intStartTime = new Date().getTime() - this.intGameStartedAt 
+					this.arrayWorldInformation["animation"].push({ "type" : "DUMMY",  "startTime" : intStartTime, "positionX" : arrayTroopOnField[1]["positionX"], "positionY" : arrayTroopOnField[1]["positionY"], "troop" : arrayTroopOnField[1]});
+				}else{
+					//troop zero hasn't moved
+					intStartTime = new Date().getTime() - this.intGameStartedAt 
+					this.arrayWorldInformation["animation"].push({ "type" : "DUMMY",  "startTime" : intStartTime, "positionX" : arrayTroopOnField[0]["positionX"], "positionY" : arrayTroopOnField[0]["positionY"], "troop" : arrayTroopOnField[0]});
+				}
+
 
 				this.arrayWorldInformation["troops"].splice(this.arrayWorldInformation["troops"].indexOf(arrayTroopOnField[0]), 1);
 				this.arrayWorldInformation["troops"].splice(this.arrayWorldInformation["troops"].indexOf(arrayTroopOnField[1]), 1);
@@ -325,7 +335,7 @@ function Game(strName, playerHost){
 			}
 
 			//set the animation
-			console.log(this.arrayWorldInformation["troops"][arrayCommand["troopId"]]["positionY"]);
+			//console.log("set Jump Animation");
 			intStartTime = new Date().getTime() - this.intGameStartedAt 
 			this.arrayWorldInformation["animation"].push({ "type" : "JUMP",  "startTime" : intStartTime, "shipId" : intTroopId, "startPositionX" : pointStartPosition.intX, "startPositionY" : pointStartPosition.intY, "troop" : arrayMovedTroop});
 			//shipId is for blocking the normal draw of the ship and troop all Information for drawing it
