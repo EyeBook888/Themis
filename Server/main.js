@@ -21,11 +21,11 @@ function Game(strName, playerHost){
 	}
 
 
-	this.arrayWorldInformation["mapHeight"] = 10;
-	this.arrayWorldInformation["mapWidth"] = 20;
-	this.arrayWorldInformation["planetAmount"] = 20;
+	this.arrayWorldInformation["mapHeight"] = 16;
+	this.arrayWorldInformation["mapWidth"] = 30;
+	this.arrayWorldInformation["planetAmount"] = 50;
 	this.arrayWorldInformation["moveOf"] = 0;
-	this.arrayWorldInformation["timePerTurn"] = 30;
+	this.arrayWorldInformation["timePerTurn"] = 60;
 	this.arrayWorldInformation["timeToNextTurn"] = this.arrayWorldInformation["timePerTurn"];
 
 
@@ -35,8 +35,7 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 19, "positionY": 9, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 29, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -197,6 +196,14 @@ function Game(strName, playerHost){
 				this.arrayWorldInformation["troops"][i]["moveAble"] = true;
 			};
 		}
+
+		//clear the animation
+		for (var i = 0; i < this.arrayWorldInformation["animation"].length; i++) {
+			intParsedTime = (new Date().getTime() - this.intGameStartedAt ) - this.arrayWorldInformation["animation"][i]["startTime"]
+			if(intParsedTime > 3000){
+				this.arrayWorldInformation["animation"].splice(i,1);
+			}
+		};
 
 		//update past time (to sing with the client)
 		this.arrayWorldInformation["pastTime"] = new Date().getTime() - this.intGameStartedAt;
