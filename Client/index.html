@@ -47,13 +47,26 @@
     <div id="gameInfo" style="background-color:rgba(255, 255, 255, 0.5)"></div>
     <input type="button" id="endTurn" value="end Turn" onClick="gameProjectionCurrentGame.endTurn()">
   </div>
-  <div id="HoverInfo" class="frame" style="position:absolute; bottom:0px; left:0px; color:green;"> hover over a troop or planet</div>
+  <div id="HoverInfo" class="frame" style="position:absolute; bottom:0px; left:0px;"> hover over a troop or planet</div>
+
+  <div id="specialAction" class="frame" style="position:absolute; bottom:0px; right:0px;"> 
+    > <input type="button" value="surrender" onClick="gameProjectionCurrentGame.surrender()"/>
+  </div>
+
+  <div id="GameEndScreen" class="frame" style="position:absolute; top:40%; height:30%; left:20%; width:60%; visibility:hidden; background-color:black;" >
+    <span id="winOrLoose">
+     The Game has end 
+    </span><br>
+    > <input type="button" onClick="gameProjectionCurrentGame.leaveGame(); document.getElementById('GameEndScreen').style.visibility = 'hidden'" value="back to lobby">
+    
+  </div>
 </div>
 
 <div id="versionInfo" style="position:absolute; bottom:0px; right:0px; background-color:rgba(255, 255, 255, 0.3); color:black;" ></div>
 
 <script language="JavaScript" src="../both/math.js" ></script>
 <script language="JavaScript" src="../both/main.js" ></script>
+<script language="JavaScript" src="../both/civilizations.js" ></script>
 <script language="JavaScript" src="./tcp-client.js" ></script>
 
 <script language="JavaScript" src="./main.js" ></script>

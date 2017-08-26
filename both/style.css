@@ -71,4 +71,6 @@ input[type=text]{
 	border-right-style: solid;
 	border-right-width: 0.5em;
 	border-right-color: rgb(0, 255, 0);
+
+	color:rgba(0, 255, 0, 1);
 }

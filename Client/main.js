@@ -11,6 +11,15 @@ function gameProjection(){
   this.pointHover = new point(0, 0);
   this.pointSelection = new point(-1, -1);//a negative value means no selection
 
+  this.intGameStartedAt = new Date().getTime();// to measure the time since the game has started
+  //a proximity the time since this gameProjection was created, but the real time is coming from the Server
+
+  this.humanCivilization = new humanCivilization();// from both/civilization
+  //at the moment just one civilization
+
+
+  this.intAnimationTime = 333;
+
 
   //load the needed images
   this.arrayImages = new Array();
@@ -26,13 +35,33 @@ function gameProjection(){
   
   this.arrayImages["planet03"] = new Image();
   this.arrayImages["planet03"].src = "../Images/planet03.png"
-  //troops
-  this.arrayImages["troopRedSmall"] = new Image();
-  this.arrayImages["troopRedSmall"].src = "../Images/troopRedSmall.png"
 
-    this.arrayImages["troopBlueSmall"] = new Image();
-  this.arrayImages["troopBlueSmall"].src = "../Images/troopBlueSmall.png"
+  this.arrayImages["explosion0"] = new Image();
+  this.arrayImages["explosion0"].src = "../Images/explosion0.png"
 
+  this.arrayImages["explosion1"] = new Image();
+  this.arrayImages["explosion1"].src = "../Images/explosion1.png"
+
+  this.arrayImages["explosion2"] = new Image();
+  this.arrayImages["explosion2"].src = "../Images/explosion2.png"
+
+  this.arrayImages["explosion3"] = new Image();
+  this.arrayImages["explosion3"].src = "../Images/explosion3.png"
+
+  this.arrayImages["explosion4"] = new Image();
+  this.arrayImages["explosion4"].src = "../Images/explosion4.png"
+
+  this.arrayImages["explosion5"] = new Image();
+  this.arrayImages["explosion5"].src = "../Images/explosion5.png"
+
+  this.arrayImages["explosion6"] = new Image();
+  this.arrayImages["explosion6"].src = "../Images/explosion6.png"
+
+  this.arrayImages["explosion7"] = new Image();
+  this.arrayImages["explosion7"].src = "../Images/explosion7.png"
+
+  this.arrayImages["explosion8"] = new Image();
+  this.arrayImages["explosion8"].src = "../Images/explosion8.png"
 
 
   intTestDistance = 2;
@@ -189,6 +218,25 @@ function gameProjection(){
     sendToServer(strJson)
   }
 
+  //to leave the game
+  this.leaveGame = function(){
+    //send command to Server
+    strJson = '{ "type": "GAMECOMMAND", "command": "LEAVEGAME" }'
+    sendToServer(strJson);
+
+    // make Lobby visible
+    document.getElementById("lobbyUi").style.visibility = "visible"
+    document.getElementById("game").style.visibility = "hidden"
+
+    //delete this game
+    gameProjectionCurrentGame = null;
+  }
+
+  //to surrender
+  this.surrender = function(){
+    strJson = '{ "type": "GAMECOMMAND", "command": "SURRENDER" }'
+    sendToServer(strJson);//send command to Server
+  }
 
 
   this.onMouseDown = function(eventE){//the click event
@@ -265,9 +313,21 @@ function gameProjection(){
       };
     };
   }
-
+  floatTimer = 0;
 
   this.draw = function(){
+
+    //calculate the time
+    var intPastTime = this.arrayWorldInformation["pastTime"];
+    //calculate back the starting time
+    var intStartTime = (new Date().getTime()) - intPastTime;
+    //if the time is older than the a proximate start time: replace it because you have a better connection now.
+    if(this.intGameStartedAt >= intStartTime){
+      this.intGameStartedAt = intStartTime;
+    }
+
+
+
 
     //fit the canvas size (width)
     this.canvasCanvas.width = this.canvasCanvas.offsetWidth;
@@ -353,7 +413,7 @@ function gameProjection(){
       strPlanetImageName = arrayPlanetImageNames[i%4];
 
       
-      //draw the planet (todo: draw a Image)
+      //draw the planet
       this.contextContext.drawImage(
         this.arrayImages[strPlanetImageName],
         intX*intHexWidth + (intY%2)*intHexWidth/2 +intHexWidth/4,//every 2ed line has to be a bit more to the right, make the Rect a bit smaller.
@@ -368,30 +428,122 @@ function gameProjection(){
     //draw the troops
     var arrayTroops = this.arrayWorldInformation["troops"]
     for (var i = 0; i < arrayTroops.length; i++) {
-      //fit the image
-      if(arrayTroops[i]["player"] == 0){//player1 is blue and player2 is red
-        var strImageId = "troopRedSmall";
-      }else{
-        var strImageId = "troopBlueSmall";
-      }
-      
+      //check if this ship has an animation
+      boolHasAnimation = false;
+      for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+        intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (this.arrayWorldInformation["animation"][a]["startTime"]);
+        //if the ship has an animation that is less than 1 sec old
+        if(this.arrayWorldInformation["animation"][a]["shipId"] == i && intAnimationRuntime <= 1000){
+          boolHasAnimation = true;
+        }
+      };
+
+
       var intX = arrayTroops[i]["positionX"];
       var intY = arrayTroops[i]["positionY"];
       
+      if(!boolHasAnimation){//only if there is no animation
       //draw the Image
       this.contextContext.drawImage(
-        this.arrayImages[strImageId],
+        this.humanCivilization.getTroopImage(arrayTroops[i]),
         intX*intHexWidth + (intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
         intY*intHexHeight*(3/4),
         intHexWidth,
         intHexHeight)
+      }
 
     };
 
 
 
 
+
+    //draw all jump animations
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "JUMP"){// --- a jumping ship
+          //draw the jump
+          var floatTimer  = intAnimationRuntime; //get time for animation 
+          var pointFrom   = new point(objCurrentAnimation["startPositionX"], objCurrentAnimation["startPositionY"])//get Start position
+          var pointTo     = new point(objCurrentAnimation["troop"]["positionX"], objCurrentAnimation["troop"]["positionY"]);// get the end position
+          var imageTroop  = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
+  
+
+          if(objCurrentAnimation["troop"]["player"] == 0){
+            //red faced to the right
+            this.drawRightJump(pointFrom, pointTo, imageTroop, floatTimer)
+          }else{
+           //red faced to the left
+           this.drawLeftJump(pointFrom, pointTo, imageTroop, floatTimer)
+          }
+
+        }
+    }
+
+    
+    //draw all dummys
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 2*this.intAnimationTime && objCurrentAnimation["type"] == "DUMMY"){ // draw a fake ship
+          //the ship
+          var imageTroop    = this.humanCivilization.getTroopImage(objCurrentAnimation["troop"]);
+          var pointPosition = new point(objCurrentAnimation["positionX"], objCurrentAnimation["positionY"])
+
+          //draw the Image
+          this.contextContext.drawImage(
+            imageTroop,
+            pointPosition.intX*intHexWidth + (pointPosition.intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+            pointPosition.intY*intHexHeight*(3/4),
+            intHexWidth,
+            intHexHeight)
+        }
+    }
+    console.log("end Dummy");
+
+
+
+    //draw all fight animations
+    for (var a = 0; a < this.arrayWorldInformation["animation"].length; a++) {
+      var objCurrentAnimation = this.arrayWorldInformation["animation"][a];
+      //calculate oldness
+      intAnimationRuntime = ((new Date().getTime()) - this.intGameStartedAt ) - (objCurrentAnimation["startTime"]);
+      //if an animation that is less than 1 sec old
+        if(intAnimationRuntime <= 1000 && objCurrentAnimation["type"] == "FIGHT"){//draw a fight
+          //draw the jump
+          //console.log("fight");
+          var floatTimer    = Math.max(intAnimationRuntime - this.intAnimationTime*2, -0.1); //get time for animation 
+          var pointPosition = new point(objCurrentAnimation["positionX"], objCurrentAnimation["positionY"]);
+
+          this.drawFight(pointPosition, floatTimer);
+
+        }
+    }
+
+
+
+
+    //this.drawFight(new point(5, 5), ((new Date().getTime()) - this.intGameStartedAt )%3000);
+
     //make other update stuff
+
+    //test for winner
+    if(this.arrayWorldInformation["winner"] != null){
+
+      if(this.arrayWorldInformation["winner"] == this.arrayWorldInformation["youAre"]){
+        document.getElementById("winOrLoose").innerHTML = "You are the winner"
+        document.getElementById("GameEndScreen").style.visibility = "visible"
+      }else{
+        document.getElementById("winOrLoose").innerHTML = "You are the looser"
+        document.getElementById("GameEndScreen").style.visibility = "visible"
+      }
+
+    }
 
     //show the time to the next move
     document.getElementById("gameInfo").innerHTML = Math.floor(this.arrayWorldInformation["timeToNextTurn"]) + "s"
@@ -412,10 +564,213 @@ function gameProjection(){
 
   }
 
+  this.drawLeftJump = function(pointJumpOffPosition, pointJumpInPosition, imageShip, floatTimer){ //beam the ship
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+    //jumping out
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.max(0, 1 - ((floatTimer/this.intAnimationTime)));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpOffPosition.intX*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2) - ((1-floatDimensionFactor.intX)*intHexWidth),//every 2ed line has to be a bit more to the right
+      pointJumpOffPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpOffPosition.intX-1)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
+        pointJumpOffPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
 
 
-  window.setInterval(function(){gameProjectionCurrentGame.draw()}, 100);
+    //jumping in
+    var strImageId = "troopBlueSmall";
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer/this.intAnimationTime)-1, 0));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpInPosition.intX*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2) + ((1-floatDimensionFactor.intX)*intHexWidth)*2,//every 2ed line has to be a bit more to the right
+      pointJumpInPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpInPosition.intX+2)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
+        pointJumpInPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+  }
+
+
+
+this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageShip, floatTimer){ //beam the ship
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+    //jumping out
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.max(0, 1 - (floatTimer/this.intAnimationTime));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpOffPosition.intX*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2) + ((1-floatDimensionFactor.intX)*intHexWidth)*2,//every 2ed line has to be a bit more to the right
+      pointJumpOffPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpOffPosition.intX+2)*intHexWidth + (pointJumpOffPosition.intY%2)*intHexWidth/2),
+        pointJumpOffPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+
+
+    //jumping in
+    var strImageId = "troopBlueSmall";
+    var floatDimensionFactor = new point(0, 0);
+    floatDimensionFactor.intY = 1;
+    floatDimensionFactor.intX = Math.min(1, Math.max((floatTimer/this.intAnimationTime)-1, 0));
+
+    //the speeding up Spaceship
+    this.contextContext.drawImage(
+      imageShip,
+      (pointJumpInPosition.intX*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2) - ((1-floatDimensionFactor.intX)*intHexWidth),//every 2ed line has to be a bit more to the right
+      pointJumpInPosition.intY*intHexHeight*(3/4) + (intHexHeight * (1-floatDimensionFactor.intY))*0.5,
+      intHexWidth * floatDimensionFactor.intX,
+      intHexHeight * floatDimensionFactor.intY)
+
+    //the "flash"
+    if(floatTimer/this.intAnimationTime >= 1.2 && floatTimer/this.intAnimationTime <= 1.5){
+      this.contextContext.fillStyle = "white";
+      this.contextContext.fillRect(
+        ((pointJumpInPosition.intX-1)*intHexWidth + (pointJumpInPosition.intY%2)*intHexWidth/2),
+        pointJumpInPosition.intY*intHexHeight*(3/4) + intHexHeight*0.25,
+        1,
+        intHexHeight*0.5
+      )
+    }
+  }
+
+
+  this.drawFight = function(pointPosition, floatTimer){
+
+    //calculate the Hexagon Size
+    var intMapHeight = this.arrayWorldInformation["mapHeight"]
+    var intMapWidth  = this.arrayWorldInformation["mapWidth"]
+
+    var intHexWidth  = this.canvasCanvas.width/(intMapWidth+(1/2));
+    var intHexHeight = intHexWidth;
+
+
+
+    this.contextContext.fillStyle = "rgba(0,0,0,0)";
+    this.contextContext.strokeStyle = "rgba(0,0,0,0)";
+
+
+    if(floatTimer <= this.intAnimationTime/2 && floatTimer >= 0){ //first draw flashes form laserguns
+      var intResolution = 10;//draw 4 circles on top of each other
+/*
+      //draw a screen wide flash
+      if(Math.random() >= 0.9){
+       this.contextContext.fillStyle = "white";
+       this.contextContext.strokeStyle = "red";
+       this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height);
+      }
+      */
+
+      var r = 0;
+      var g = 0;
+      var b = 0;
+      var a = 0;
+
+      if(Math.random() >= 0.6){
+        var r = 255;
+        var g = 255;
+        var b = 255;
+        var a = 1;
+      }
+
+      for (var c = 0; c < intResolution; c++) {
+
+        this.contextContext.fillStyle = "rgba(" + r+ ", " +  g +"," + b + "," + (a/intResolution) + ")";
+        this.contextContext.strokeStyle = "rgba(" + r+ ", " +  g +"," + b + "," + (a/intResolution) + ")";;
+
+        this.contextContext.beginPath()
+        this.contextContext.arc(
+          pointPosition.intX*intHexWidth + intHexWidth/2 + (pointPosition.intY%2)*intHexWidth/2,
+          pointPosition.intY*intHexHeight*(3/4) + intHexHeight/2,
+          intHexWidth*3 * (c/intResolution),
+          0*Math.PI,2*Math.PI)
+        this.contextContext.stroke()
+        this.contextContext.fill()
+      }
+    }else if(floatTimer <= this.intAnimationTime && floatTimer >= this.intAnimationTime/2){//draw the explosion
+      arrayExplosionImagesIds = ["explosion0", "explosion1", "explosion2", "explosion3", "explosion4", "explosion5", "explosion6", "explosion7", "explosion8"];
+      
+      var intTotalTime    = this.intAnimationTime/2;
+      var intTimePerImage = intTotalTime/arrayExplosionImagesIds.length;
+      var intCurrentTime  = floatTimer - this.intAnimationTime/2;
+
+      var intImageId      = Math.floor(intCurrentTime/intTimePerImage);
+      var strImageId      = arrayExplosionImagesIds[intImageId];
+      console.log(strImageId);
+      try{
+        this.contextContext.drawImage(
+         this.arrayImages[strImageId],
+         pointPosition.intX*intHexWidth + (pointPosition.intY%2)*intHexWidth/2,//every 2ed line has to be a bit more to the right
+         pointPosition.intY*intHexHeight*(3/4),
+         intHexWidth,
+          intHexHeight)
+      }catch(error){
+
+      }
+
+    }
+
+
+  }
+
+
 }
+
+window.setInterval(function(){
+    if(gameProjectionCurrentGame != null){
+      gameProjectionCurrentGame.draw()
+   }
+  }, 20);
 
 
 
@@ -443,6 +798,7 @@ function createGame(){
   strJson = '{ "type": "CREATEGAME", "name": "' + strGameName + '" }'
   sendToServer(strJson)
 }
+
 
 
 
@@ -475,10 +831,7 @@ function interpretMessage(strMessage){
   else if(arrayCommand["type"] == "WORLDINFO"){
     
     if(gameProjectionCurrentGame == null){//Create the new game
-      gameProjectionCurrentGame = new gameProjection()
-      // set the move and click event
-      gameProjectionCurrentGame.canvasCanvas.addEventListener("mousemove", function(e){gameProjectionCurrentGame.onMouseMove(e)}, false);
-      gameProjectionCurrentGame.canvasCanvas.addEventListener("click", function(e){gameProjectionCurrentGame.onMouseDown(e)}, false);
+      gameProjectionCurrentGame = new gameProjection()      
     }
 
     //change the worldinfos
@@ -494,6 +847,8 @@ function interpretMessage(strMessage){
 
 functionOnMessage = interpretMessage;
 //override the default "OnMessage"-function
+
+
 
 
 //set the version
@@ -524,7 +879,7 @@ function parseURLParams() {
     }
     return parms;
 }
-
+if(parseURLParams() != null){
 if(parseURLParams()["auto"] == "true"){
   strId = parseURLParams()["id"];
 
@@ -539,4 +894,11 @@ if(parseURLParams()["auto"] == "true"){
   }
 
   window.setTimeout(function(){connectToServer()}, 100);
+}
+}
+
+window.onload = function(){
+  // set the move and click event 
+  document.getElementById("gameBoard").addEventListener("mousemove", function(e){gameProjectionCurrentGame.onMouseMove(e)}, false);
+  document.getElementById("gameBoard").addEventListener("click", function(e){gameProjectionCurrentGame.onMouseDown(e)}, false);
 }
