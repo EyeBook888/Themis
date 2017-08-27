@@ -21,6 +21,8 @@ function Game(strName, playerHost){
 	}
 
 
+	this.arrayWorldInformation["playerAmount"] = 3;
+
 	this.arrayWorldInformation["mapHeight"] = 16;
 	this.arrayWorldInformation["mapWidth"] = 30;
 	this.arrayWorldInformation["planetAmount"] = 50;
@@ -29,13 +31,16 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["timeToNextTurn"] = this.arrayWorldInformation["timePerTurn"];
 
 
-	this.arrayWorldInformation["winner"] = null;
+	this.arrayWorldInformation["loserIds"] = new Array();
 
 
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
 	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 29, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 2, "positionX": 0, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+	//this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 3, "positionX": 0, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+
 
 	this.arrayWorldInformation["planets"] = new Array();
 
@@ -50,13 +55,26 @@ function Game(strName, playerHost){
 
 	this.joinPlayer = function(playerPlayer){
 		console.log(playerPlayer)
-		this.arrayMyPlayers[1] = playerPlayer;
-		this.arrayMyPlayers[1].gameMyGame = this;//register this Game at the 2ed Player
+		console.log("0")
+		this.arrayMyPlayers.push(playerPlayer);
+		console.log("1")
+		playerPlayer.gameMyGame = this;//register this Game at the 2ed Player
+		console.log("2")
+		
+		if(this.isFull()){//start game (only if it is full)
+			console.log("start");
+			//set the startTime
+			this.intGameStartedAt = new Date().getTime();
 
-		//set the startTime
-		this.intGameStartedAt = new Date().getTime();
+			this.sendUpdate();
+		}else{
+			console.log("more Players needed");
+		}
+		console.log("------");
+	}
 
-		this.sendUpdate();
+	this.isFull = function(){
+		return this.arrayMyPlayers.length >= this.arrayWorldInformation["playerAmount"]
 	}
 
 	this.getPlanetIdByPosition = function(pointPosition){
@@ -375,12 +393,12 @@ function Game(strName, playerHost){
 				intTroopAmounts[this.arrayWorldInformation["troops"][i]["player"]] ++ ;
 			};
 
-			//set the winner
-			if(intTroopAmounts[0] <= 0){
-				this.arrayWorldInformation["winner"] = 1;
-			}else if(intTroopAmounts[1] <= 0){
-				this.arrayWorldInformation["winner"] = 0;
-			}
+			//if any player has no troops set him to loser
+			for (var i = 0; i < this.arrayMyPlayers.length; i++) {
+				if(intTroopAmounts[i] == 0){
+					this.arrayWorldInformation["loserIds"].push(i)
+				}
+			};
 
 
 			return;
@@ -399,8 +417,7 @@ function Game(strName, playerHost){
 			playerPlayer.gameMyGame = null;
 		}else if(arrayCommand["command"] == "SURRENDER"){//let one player leave the Game
 			var intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
-			intPlayerId = (intPlayerId+1)%2//get the opposite player
-			this.arrayWorldInformation["winner"] = intPlayerId;
+			this.arrayWorldInformation["loserIds"].push(intPlayerId);
 		}
 
 		console.error("unknown game-command");
@@ -444,9 +461,7 @@ function Game(strName, playerHost){
 		pointNewPlanetAt = new point(0, 0)
 		do {
 			pointNewPlanetAt.intX = Math.floor(Math.random()*intMiddleX)
-			pointNewPlanetAt.intY = Math.floor(Math.random()*this.arrayWorldInformation["mapHeight"])
-			console.log(pointNewPlanetAt.toString());
-			console.log(this.getPlanetIdByPosition(pointNewPlanetAt));
+			pointNewPlanetAt.intY = Math.floor(Math.random()*this.arrayWorldInformation["mapHeight"]);
 		} while(this.getPlanetIdByPosition(pointNewPlanetAt) != null)
 
 		//per 1 Population size of troop increase by one
@@ -469,9 +484,7 @@ function Game(strName, playerHost){
 		pointNewMirrorPlanetAt.intY = this.arrayWorldInformation["mapHeight"] - pointNewPlanetAt.intY -1;
 
 		//set the planet
-		console.log("pointAt:" + pointNewMirrorPlanetAt.toString());
 		this.arrayWorldInformation["planets"][i+1] = {"player" : null, "positionX": pointNewMirrorPlanetAt.intX, "positionY": pointNewMirrorPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
-	//	console.log("pointAt:" + pointNewMirrorPlanetAt.toString());
 	
 
 	}
@@ -517,7 +530,7 @@ function interpretMessage(intId, strText){
 		var intGameId = arrayCommand["id"];
 
 		//test if there is space
-		if(arrayAllGames[intGameId].arrayMyPlayers.length == 1){
+		if(!arrayAllGames[intGameId].isFull()){
 			//join the player
 			arrayAllGames[intGameId].joinPlayer(arrayAllPlayers[intId])
 		}else{
@@ -580,10 +593,9 @@ function update(){
 
 
 	//update all games
-
 	for (var i = 0; i < arrayAllGames.length; i++) {
 		//but only if the game is full
-		if(arrayAllGames[i].arrayMyPlayers.length == 2){
+		if(arrayAllGames[i].isFull()){
 			arrayAllGames[i].update();
 		}
 	}

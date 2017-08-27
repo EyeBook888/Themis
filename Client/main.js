@@ -548,10 +548,14 @@ function gameProjection(){
     //show the time to the next move
     document.getElementById("gameInfo").innerHTML = Math.floor(this.arrayWorldInformation["timeToNextTurn"]) + "s"
 
-    if(this.arrayWorldInformation["moveOf"] == 1){//player1 is blue and player2 is red
-      document.getElementById("gameInfo").style.color = "blue";
-    }else{
+    if(this.arrayWorldInformation["moveOf"] == 0){//player1 is blue and player2 is red
       document.getElementById("gameInfo").style.color = "red";
+    }else if(this.arrayWorldInformation["moveOf"] == 1){
+      document.getElementById("gameInfo").style.color = "blue";
+    }else if(this.arrayWorldInformation["moveOf"] == 2){
+      document.getElementById("gameInfo").style.color = "yellow";
+    }else if(this.arrayWorldInformation["moveOf"] == 3){
+      document.getElementById("gameInfo").style.color = "green";
     }
 
     //show or hide end Turn button
@@ -889,9 +893,12 @@ if(parseURLParams()["auto"] == "true"){
 
   if(strId == "0"){
     window.moveBy(-window.outerWidth, -window.outerHeight)
-  }else{
+  }else if(strId == "1"){
     window.moveBy(-window.outerWidth, window.outerHeight)
+  }else{
+     window.moveBy(+window.outerWidth, -window.outerHeight)
   }
+  console.log("Player: " + strId)
 
   window.setTimeout(function(){connectToServer()}, 100);
 }
