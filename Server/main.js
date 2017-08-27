@@ -77,6 +77,26 @@ function Game(strName, playerHost){
 		return this.arrayMyPlayers.length >= this.arrayWorldInformation["playerAmount"]
 	}
 
+	this.isThisLostKnown = function(intId){
+		//test if a player has already lost
+		for (var i = 0; i < this.arrayWorldInformation["loserIds"].length; i++) {
+			if(this.arrayWorldInformation["loserIds"][i] == intId){
+				return true;
+			}
+			console.log(intId + "!=" + this.arrayWorldInformation["loserIds"][i]);
+		};
+		return false;
+	}
+
+	this.letPlayerLose = function(intId){
+		if(this.isThisLostKnown(intId)){
+			return null;
+		}
+		this.arrayWorldInformation["loserIds"].push(intId);
+
+	}
+
+
 	this.getPlanetIdByPosition = function(pointPosition){
     	var arrayPlanets = this.arrayWorldInformation["planets"]
 
@@ -396,7 +416,7 @@ function Game(strName, playerHost){
 			//if any player has no troops set him to loser
 			for (var i = 0; i < this.arrayMyPlayers.length; i++) {
 				if(intTroopAmounts[i] == 0){
-					this.arrayWorldInformation["loserIds"].push(i)
+					this.letPlayerLose(i);
 				}
 			};
 
@@ -417,7 +437,7 @@ function Game(strName, playerHost){
 			playerPlayer.gameMyGame = null;
 		}else if(arrayCommand["command"] == "SURRENDER"){//let one player leave the Game
 			var intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
-			this.arrayWorldInformation["loserIds"].push(intPlayerId);
+			this.letPlayerLose(intPlayerId);
 		}
 
 		console.error("unknown game-command");

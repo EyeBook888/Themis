@@ -532,18 +532,24 @@ function gameProjection(){
 
     //make other update stuff
 
-    //test for winner
-    if(this.arrayWorldInformation["winner"] != null){
-
-      if(this.arrayWorldInformation["winner"] == this.arrayWorldInformation["youAre"]){
-        document.getElementById("winOrLoose").innerHTML = "You are the winner"
-        document.getElementById("GameEndScreen").style.visibility = "visible"
-      }else{
-        document.getElementById("winOrLoose").innerHTML = "You are the looser"
-        document.getElementById("GameEndScreen").style.visibility = "visible"
+    //test if your id is in the loser array
+    boolLose = false;
+    for(i = 0; i < this.arrayWorldInformation["loserIds"].length; i++){
+      if(this.arrayWorldInformation["loserIds"][i] == this.arrayWorldInformation["youAre"]){
+        boolLose = true;
       }
-
     }
+
+    if(boolLose){
+      //if you have lost
+      document.getElementById("winOrLoose").innerHTML = "You have lost"
+      document.getElementById("GameEndScreen").style.visibility = "visible"
+    }else if(this.arrayWorldInformation["loserIds"].length == this.arrayWorldInformation["playerAmount"]-1){
+      //if all players with out you have lost
+      document.getElementById("winOrLoose").innerHTML = "You have won"
+        document.getElementById("GameEndScreen").style.visibility = "visible"
+    }
+
 
     //show the time to the next move
     document.getElementById("gameInfo").innerHTML = Math.floor(this.arrayWorldInformation["timeToNextTurn"]) + "s"
