@@ -21,7 +21,7 @@ function Game(strName, playerHost){
 	}
 
 
-	this.arrayWorldInformation["playerAmount"] = 3;
+	this.arrayWorldInformation["playerAmount"] = 4;
 
 	this.arrayWorldInformation["mapHeight"] = 16;
 	this.arrayWorldInformation["mapWidth"] = 30;
@@ -39,7 +39,7 @@ function Game(strName, playerHost){
 	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
 	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 29, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 2, "positionX": 0, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
-	//this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 3, "positionX": 0, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+	this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 3, "positionX": 29, "positionY": 0, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
 
 
 	this.arrayWorldInformation["planets"] = new Array();
