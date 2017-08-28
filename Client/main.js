@@ -784,6 +784,9 @@ window.setInterval(function(){
 
 
 
+// ------------ lobby, etc. ui stuff ------------
+
+
 function connectToServer(){
   //read the name and Ip from the inputs
   strIp = document.getElementById("serverIp").value;
@@ -799,14 +802,42 @@ function connectToServer(){
   window.setTimeout(function(){sendToServer('{ "type": "GETLOBBYINFO"}');}, 1000);
 }
 
+
 function joinGame(intId){
   sendToServer('{ "type": "JOINGAME", "id": ' + intId + ' }')
 }
 
 function createGame(){
   var strGameName = document.getElementById("gameName").value;
-  strJson = '{ "type": "CREATEGAME", "name": "' + strGameName + '" }'
+
+  var arraySettings = new Object();
+  arraySettings["playerAmount"]= parseInt(document.getElementById("gamePlayerAmount").value);
+  arraySettings["mapWidth"]    = parseInt(document.getElementById("gameMapWidth").value);
+  arraySettings["mapHeight"]   = parseInt(document.getElementById("gameMapHeight").value);
+  arraySettings["timePerTurn"] = parseInt(document.getElementById("gameTime").value);
+  console.log(arraySettings)
+
+  var arrayCommand = new Object();
+  arrayCommand["type"]     = "CREATEGAME";
+  arrayCommand["name"]     = strGameName;
+  arrayCommand["settings"] = arraySettings;
+console.log(arrayCommand)
+
+  strJson = JSON.stringify(arrayCommand);
+  console.log(strJson)
   sendToServer(strJson)
+}
+
+function changeAmount(strId, intAmount, intMin, intMax){
+  strCurrentAmount = document.getElementById(strId).value;
+  intCurrentAmount = parseInt(strCurrentAmount);
+
+  intCurrentAmount += intAmount;
+
+  intCurrentAmount = Math.min(intCurrentAmount, intMax)
+  intCurrentAmount = Math.max(intCurrentAmount, intMin)
+
+  document.getElementById(strId).value = intCurrentAmount;
 }
 
 

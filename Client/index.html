@@ -32,8 +32,28 @@
   <div id="lobbyInfo">
   
   </div>
-  create new Game:
-  <input type="text" placeholder="name" id="gameName" ><input type="button" value="create" onClick="createGame()">
+
+  <div class="frame">
+  create new Game:<br>
+  > <input type="text" placeholder="name" id="gameName" style="width:10em"><br>
+  > Player: <input type="text" value="2" style="width:2em" id="gamePlayerAmount">
+  <input type="button" value="-" onClick="changeAmount('gamePlayerAmount', -1, 2, 4)">
+  <input type="button" value="+" onClick="changeAmount('gamePlayerAmount',  1, 2, 4)"><br><br>
+
+  > Map width: <input type="text" value="30" style="width:2em" id="gameMapWidth">
+  <input type="button" value="-" onClick="changeAmount('gameMapWidth', -2, 6, 60)">
+  <input type="button" value="+" onClick="changeAmount('gameMapWidth', 2, 6, 60)"><br>
+
+  > Map height: <input type="text" value="16" style="width:2em" id="gameMapHeight">
+  <input type="button" value="-" onClick="changeAmount('gameMapHeight', -2, 4, 32)">
+  <input type="button" value="+" onClick="changeAmount('gameMapHeight', 2, 4, 32)"><br><br>
+
+  > Time: <input type="text" value="60" style="width:2em" id="gameTime">
+  <input type="button" value="-" onClick="changeAmount('gameTime', -2,5, 180)">
+  <input type="button" value="+" onClick="changeAmount('gameTime', 2, 5, 180)"><br>
+
+  <input type="button" value="create" onClick="createGame()"><br>
+  </div>
 </div>
 
 

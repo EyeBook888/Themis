@@ -4,7 +4,7 @@ function Player(intId, strName){
 	this.gameMyGame = null;
 }
 
-function Game(strName, playerHost){
+function Game(strName, playerHost, settings){
 	console.log("new Game");
 	this.strName 			= strName;
 	this.arrayMyPlayers 	= new Array();
@@ -21,25 +21,43 @@ function Game(strName, playerHost){
 	}
 
 
-	this.arrayWorldInformation["playerAmount"] = 4;
+	this.arrayWorldInformation["playerAmount"] = settings["playerAmount"];
 
-	this.arrayWorldInformation["mapHeight"] = 16;
-	this.arrayWorldInformation["mapWidth"] = 30;
+	this.arrayWorldInformation["mapHeight"] = settings["mapHeight"];
+	this.arrayWorldInformation["mapWidth"] = settings["mapWidth"];
 	this.arrayWorldInformation["planetAmount"] = 50;
 	this.arrayWorldInformation["moveOf"] = 0;
-	this.arrayWorldInformation["timePerTurn"] = 60;
+	this.arrayWorldInformation["timePerTurn"] = settings["timePerTurn"];
 	this.arrayWorldInformation["timeToNextTurn"] = this.arrayWorldInformation["timePerTurn"];
 
 
 	this.arrayWorldInformation["loserIds"] = new Array();
 
 
+
 	this.arrayWorldInformation["troops"] = new Array();
 	//place start troop
-	this.arrayWorldInformation["troops"][0] = {"size": 5, "player" : 0, "positionX": 0, "positionY": 0, "technicLevel" : 3, "morale": 1, "moveAble" : true}
-	this.arrayWorldInformation["troops"][1] = {"size": 5, "player" : 1, "positionX": 29, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
-	this.arrayWorldInformation["troops"][2] = {"size": 5, "player" : 2, "positionX": 0, "positionY": 15, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
-	this.arrayWorldInformation["troops"][3] = {"size": 5, "player" : 3, "positionX": 29, "positionY": 0, "technicLevel" : 3, "morale": 1 ,"moveAble" : true}
+
+	//all start position
+	var arrayPossibleStartPosition = new Array();
+	arrayPossibleStartPosition.push(new point(0, 0));
+	arrayPossibleStartPosition.push(new point(this.arrayWorldInformation["mapWidth"]-1, this.arrayWorldInformation["mapHeight"]-1));
+	arrayPossibleStartPosition.push(new point(0, this.arrayWorldInformation["mapHeight"]-1));
+	arrayPossibleStartPosition.push(new point(this.arrayWorldInformation["mapWidth"]-1, 0));
+
+	console.log("Troops")
+	console.log(arrayPossibleStartPosition)
+	//place start troop
+	for (var i = 0; i < this.arrayWorldInformation["playerAmount"]; i++) {
+		console.log(i)
+		//get the point
+		var pointPosition = arrayPossibleStartPosition[i];
+		//generate new troop
+		var arrayNewTroop = {"size": 5, "player" : i, "positionX": pointPosition.intX, "positionY": pointPosition.intY, "technicLevel" : 3, "morale": 1, "moveAble" : true}
+		//add them to the array
+		this.arrayWorldInformation["troops"].push(arrayNewTroop);
+	};
+	console.log("Troops end")
 
 
 	this.arrayWorldInformation["planets"] = new Array();
@@ -55,14 +73,10 @@ function Game(strName, playerHost){
 
 	this.joinPlayer = function(playerPlayer){
 		console.log(playerPlayer)
-		console.log("0")
 		this.arrayMyPlayers.push(playerPlayer);
-		console.log("1")
 		playerPlayer.gameMyGame = this;//register this Game at the 2ed Player
-		console.log("2")
 		
 		if(this.isFull()){//start game (only if it is full)
-			console.log("start");
 			//set the startTime
 			this.intGameStartedAt = new Date().getTime();
 
@@ -70,7 +84,6 @@ function Game(strName, playerHost){
 		}else{
 			console.log("more Players needed");
 		}
-		console.log("------");
 	}
 
 	this.isFull = function(){
@@ -92,6 +105,29 @@ function Game(strName, playerHost){
 		if(this.isThisLostKnown(intId)){
 			return null;
 		}
+
+		//destroy all ship that belong to the player
+		for (var i = 0; i < this.arrayWorldInformation["troops"].length; i++) {
+			if(this.arrayWorldInformation["troops"][i]["player"] == intId){
+				//save the troop
+				var arrayCurrentTroop = this.arrayWorldInformation["troops"][i]
+				//delete the ship
+				this.arrayWorldInformation["troops"].splice(i, 1)
+				//set an explosion
+				intStartTime = new Date().getTime() - this.intGameStartedAt;
+				this.arrayWorldInformation["animation"].push({ "type" : "DUMMY",  "startTime" : intStartTime, "positionX" : arrayCurrentTroop["positionX"], "positionY" : arrayCurrentTroop["positionY"], "troop" : arrayCurrentTroop});
+				this.arrayWorldInformation["animation"].push({ "type" : "FIGHT", "positionX" : arrayCurrentTroop["positionX"], "positionY" : arrayCurrentTroop["positionY"], "startTime" : intStartTime});
+			}
+		};
+
+		//rest all planets
+		for (var i = 0; i < this.arrayWorldInformation["planets"].length; i++) {
+			if(this.arrayWorldInformation["planets"][i]["player"] == intId){
+				this.arrayWorldInformation["planets"][i]["player"] = null;
+			}
+		}
+
+
 		this.arrayWorldInformation["loserIds"].push(intId);
 
 	}
@@ -204,9 +240,11 @@ function Game(strName, playerHost){
 		this.arrayWorldInformation["timeToNextTurn"] = this.arrayWorldInformation["timePerTurn"];
 
 
-		//change the player	
-		this.arrayWorldInformation["moveOf"] += 1;
-		this.arrayWorldInformation["moveOf"] %= this.arrayMyPlayers.length;
+		//change the player
+		do{
+			this.arrayWorldInformation["moveOf"] += 1;
+			this.arrayWorldInformation["moveOf"] %= this.arrayMyPlayers.length;
+		}while(this.isThisLostKnown(this.arrayWorldInformation["moveOf"]));//change the player again if the next player has already lost
 
 
 
@@ -539,7 +577,7 @@ function interpretMessage(intId, strText){
 	}else if(arrayCommand["type"] == "CREATEGAME"){
 		//create a new Game
 		console.log(arrayAllPlayers[intId]);
-		arrayAllGames.push(new Game(arrayCommand["name"], arrayAllPlayers[intId]));
+		arrayAllGames.push(new Game(arrayCommand["name"], arrayAllPlayers[intId], arrayCommand["settings"]));
 
 		//update the lobby for every Player
 		sendToEveryone(getLobby());
