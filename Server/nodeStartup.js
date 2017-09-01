@@ -33,6 +33,7 @@ stdin.addListener("data", function(d) {
 var fs = require('fs');
 eval(fs.readFileSync('../both/math.js')+'');
 eval(fs.readFileSync('../both/main.js')+'');
+eval(fs.readFileSync('../both/playerActions.js')+'');
 eval(fs.readFileSync('./tcp-server.js')+'');
 eval(fs.readFileSync('./main.js')+'');
 

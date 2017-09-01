@@ -45,7 +45,6 @@ function Game(strName, playerHost, settings){
 	arrayPossibleStartPosition.push(new point(0, this.arrayWorldInformation["mapHeight"]-1));
 	arrayPossibleStartPosition.push(new point(this.arrayWorldInformation["mapWidth"]-1, 0));
 
-	console.log("Troops")
 	console.log(arrayPossibleStartPosition)
 	//place start troop
 	for (var i = 0; i < this.arrayWorldInformation["playerAmount"]; i++) {
@@ -57,7 +56,15 @@ function Game(strName, playerHost, settings){
 		//add them to the array
 		this.arrayWorldInformation["troops"].push(arrayNewTroop);
 	};
-	console.log("Troops end")
+
+	//create the player actions Infos
+	this.arrayWorldInformation["playerActions"] = new Array()
+	for (var i = 0; i < this.arrayWorldInformation["playerAmount"]; i++) {
+		console.log("new Player Action");
+		this.arrayWorldInformation["playerActions"][i] = new Array();
+		//every one has the surrender Action
+		this.arrayWorldInformation["playerActions"][i][0] = arrayPlayerActions[0].arrayData
+	};
 
 
 	this.arrayWorldInformation["planets"] = new Array();
@@ -431,6 +438,17 @@ function Game(strName, playerHost, settings){
 				//save the id of the troop
 				var intTroopId = this.getTroopsIdByPosition(new point(arrayCommand["newX"], arrayCommand["newY"]))[0];
 
+				if(this.arrayWorldInformation["planets"][intPlanetId]["playerAction"]){
+					//if you get a player Action form this planet
+					this.arrayWorldInformation["planets"][intPlanetId]["playerAction"] =false; //you can only get The action once
+
+					intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
+					intActionId = Math.floor(Math.random() * arrayPlayerActions.length - 0.00001);//select a action
+					this.arrayWorldInformation["playerActions"][intPlayerId].push(arrayPlayerActions[intActionId].arrayData);
+
+
+				}
+
 				//override the owner
 				this.arrayWorldInformation["planets"][intPlanetId]["player"] = this.arrayWorldInformation["troops"][intTroopId]["player"]
 			}
@@ -473,9 +491,28 @@ function Game(strName, playerHost, settings){
 			intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
 			this.arrayMyPlayers[intPlayerId] = null;//set the game for this player to null
 			playerPlayer.gameMyGame = null;
-		}else if(arrayCommand["command"] == "SURRENDER"){//let one player leave the Game
+		}else if(arrayCommand["command"] == "ACTION"){//take a Action
 			var intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
-			this.letPlayerLose(intPlayerId);
+			var intActionId = arrayCommand["id"];
+
+			//
+			//test if the player has the action
+		 	boolHasAction = false;
+		 	for (var i = 0; i < this.arrayWorldInformation["playerActions"][intPlayerId].length; i++) {
+		 		if(this.arrayWorldInformation["playerActions"][intPlayerId][i]["id"] == intActionId && !boolHasAction){
+		 			boolHasAction = true;
+		 			//delete the action because it can only be used once
+		 			this.arrayWorldInformation["playerActions"][intPlayerId].splice(i, 1);
+		 		}
+		 	};
+		 	if(!boolHasAction){
+		 		return;
+		 	}
+
+
+			arrayPlayerActions[intActionId].takePlace(this, intPlayerId);
+
+			//this.letPlayerLose(intPlayerId);
 		}
 
 		console.error("unknown game-command");
@@ -531,7 +568,13 @@ function Game(strName, playerHost, settings){
 		// per 1 recovery factor morale is increase by 0.03;
 		intRecoveryFactor = Math.floor(Math.random()*5);
 
-		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
+		// if this unlock a player action
+		boolPlayerAction = false;
+		if(Math.random() <= 0.3){
+			boolPlayerAction = true;
+		}
+
+		this.arrayWorldInformation["planets"][i] = {"player" : null, "positionX": pointNewPlanetAt.intX, "positionY": pointNewPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge, "playerAction" : boolPlayerAction };
 	
 
 
@@ -542,7 +585,7 @@ function Game(strName, playerHost, settings){
 		pointNewMirrorPlanetAt.intY = this.arrayWorldInformation["mapHeight"] - pointNewPlanetAt.intY -1;
 
 		//set the planet
-		this.arrayWorldInformation["planets"][i+1] = {"player" : null, "positionX": pointNewMirrorPlanetAt.intX, "positionY": pointNewMirrorPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge};
+		this.arrayWorldInformation["planets"][i+1] = {"player" : null, "positionX": pointNewMirrorPlanetAt.intX, "positionY": pointNewMirrorPlanetAt.intY, "population" : intPopulation , "recoveryFactor" : intRecoveryFactor, "knowledge" : intKnowledge, "playerAction" : boolPlayerAction };
 	
 
 	}

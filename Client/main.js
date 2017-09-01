@@ -201,6 +201,11 @@ function gameProjection(){
       }
 
       strInfoHTML += "recovery factor: " + this.arrayWorldInformation["planets"][intPlanetId]["recoveryFactor"];
+
+      //if the planet has a player Action
+      if(this.arrayWorldInformation["planets"][intPlanetId]["playerAction"]){
+        strInfoHTML += "<br>unlocks Action"
+      }
     }
     
     if(strInfoHTML == ""){
@@ -233,8 +238,9 @@ function gameProjection(){
   }
 
   //to surrender
-  this.surrender = function(){
-    strJson = '{ "type": "GAMECOMMAND", "command": "SURRENDER" }'
+  this.makeAction = function(intId){
+    console.log("action " + intId);
+    strJson = '{ "type": "GAMECOMMAND", "command": "ACTION", "id" : ' + intId +' }'
     sendToServer(strJson);//send command to Server
   }
 
@@ -314,6 +320,8 @@ function gameProjection(){
     };
   }
   floatTimer = 0;
+
+  intOldActionAmount = 0;
 
   this.draw = function(){
 
@@ -531,6 +539,27 @@ function gameProjection(){
     //this.drawFight(new point(5, 5), ((new Date().getTime()) - this.intGameStartedAt )%3000);
 
     //make other update stuff
+
+    //update player Actions
+    arrayYourActions = this.arrayWorldInformation["playerActions"][this.arrayWorldInformation["youAre"]]
+    //reset HTML of playerActions
+    console.log(arrayYourActions);
+    if(intOldActionAmount != arrayYourActions.length){
+      //only if something has change 
+      document.getElementById("playerActions").innerHTML = "";
+      for (var i = 0; i < arrayYourActions.length; i++) {
+       //generate HTML code  
+       var strButton = '> <input type="button" value="' + arrayYourActions[i]["name"] + ' " onClick="gameProjectionCurrentGame.makeAction(' + arrayYourActions[i]["id"] + ')"/> <br>';
+
+        document.getElementById("playerActions").innerHTML += strButton; 
+      };
+    }
+
+    intOldActionAmount = arrayYourActions.length;
+
+
+
+
 
     //test if your id is in the loser array
     boolLose = false;
