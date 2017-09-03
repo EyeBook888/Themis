@@ -495,19 +495,30 @@ function Game(strName, playerHost, settings){
 			var intPlayerId = this.arrayMyPlayers.indexOf(playerPlayer);
 			var intActionId = arrayCommand["id"];
 
+			console.log("ACTION");
+			console.log(this.arrayWorldInformation["moveOf"] == intPlayerId)
+
 			//
 			//test if the player has the action
 		 	boolHasAction = false;
-		 	for (var i = 0; i < this.arrayWorldInformation["playerActions"][intPlayerId].length; i++) {
-		 		if(this.arrayWorldInformation["playerActions"][intPlayerId][i]["id"] == intActionId && !boolHasAction){
-		 			boolHasAction = true;
-		 			//delete the action because it can only be used once
-		 			this.arrayWorldInformation["playerActions"][intPlayerId].splice(i, 1);
-		 		}
-		 	};
+
+		 	//test if the player can make this player action
+			if(arrayPlayerActions[intActionId].canTakeAction(this, intPlayerId)){
+				console.log("check");
+		 		for (var i = 0; i < this.arrayWorldInformation["playerActions"][intPlayerId].length; i++) {
+		 			if(this.arrayWorldInformation["playerActions"][intPlayerId][i]["id"] == intActionId && !boolHasAction){
+		 				boolHasAction = true;
+		 				//delete the action because it can only be used once
+		 				this.arrayWorldInformation["playerActions"][intPlayerId].splice(i, 1);
+		 				
+		 			}
+		 		};
+		 	}
 		 	if(!boolHasAction){
 		 		return;
 		 	}
+
+
 
 
 			arrayPlayerActions[intActionId].takePlace(this, intPlayerId);
@@ -570,7 +581,7 @@ function Game(strName, playerHost, settings){
 
 		// if this unlock a player action
 		boolPlayerAction = false;
-		if(Math.random() <= 0.3){
+		if(Math.random() <= 1){
 			boolPlayerAction = true;
 		}
 

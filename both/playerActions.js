@@ -12,6 +12,10 @@ arrayPlayerActions.push(
 			gameGame.letPlayerLose(intPlayerId);
 		}
 
+		this.canTakeAction = function(gameGame, intPlayerId){
+			return true;
+		};
+
 
 	}
 	)
@@ -26,6 +30,10 @@ arrayPlayerActions.push(
 		this.takePlace = function(gameGame, intPlayerId){
 			gameGame.arrayWorldInformation["troops"] = new Array();
 		}
+
+		this.canTakeAction = function(gameGame, intPlayerId){
+			return gameGame.arrayWorldInformation["moveOf"] == intPlayerId;
+		};
 
 
 	}
