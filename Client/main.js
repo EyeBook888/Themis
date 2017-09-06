@@ -7,6 +7,11 @@ function gameProjection(){
   this.canvasCanvas   = document.getElementById("gameBoard");
   this.contextContext = this.canvasCanvas.getContext("2d");
 
+  //star Background
+  this.starBackgroundBackground = new starBackground();
+  this.starBackgroundBackground.generateImage();
+
+
   this.intSelection = new point(0, 0);
   this.pointHover = new point(0, 0);
   this.pointSelection = new point(-1, -1);//a negative value means no selection
@@ -128,6 +133,15 @@ function gameProjection(){
     }
     return null;
   }
+
+  this.onCanvasSizeChange = function(){
+    //because the dimensions for the background Image have change
+
+    gameProjectionCurrentGame.starBackgroundBackground.pointSize = new point(this.canvasCanvas.width, this.canvasCanvas.height)
+    this.starBackgroundBackground.generateImage();
+  }
+
+
 
   //mousemove Event
   this.onMouseMove = function(eventE){
@@ -323,6 +337,8 @@ function gameProjection(){
 
   intOldActionAmount = 0;
 
+  this.pointOldSize = new point(0, 0);//for the canvas size change Event
+
   this.draw = function(){
 
     //calculate the time
@@ -352,8 +368,20 @@ function gameProjection(){
     this.canvasCanvas.style.height = ((intMapHeight*0.75) * intHexHeight + intHexHeight*0.25) + "px";
 
 
+    //check if the display size has change
+    if(! this.pointOldSize.equal(new point(this.canvasCanvas.width, this.canvasCanvas.height))){
+      this.onCanvasSizeChange();
+      this.pointOldSize = new point(this.canvasCanvas.width, this.canvasCanvas.height);
+    }
+
+
     this.contextContext.fillStyle = "black"
     this.contextContext.fillRect(0, 0, this.canvasCanvas.width, this.canvasCanvas.height)
+
+    //draw the stars (Background)
+    this.contextContext.drawImage(this.starBackgroundBackground.getImage(), 0, 0, this.canvasCanvas.width, this.canvasCanvas.height)
+
+
 
     this.contextContext.fillStyle = "rgba(255, 255, 255, 0)"
     this.contextContext.strokeStyle = "rgba(0, 255, 0, 0.1)"
@@ -804,6 +832,47 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
 
 
 }
+
+
+
+function starBackground(){
+  this.pointSize = new point(100, 100);
+  this.canvasCanvas = document.createElement('canvas');
+  this.intStarAmount = 1000;
+
+
+  this.generateImage = function(){
+    this.canvasCanvas.width  = this.pointSize.intX;
+    this.canvasCanvas.height = this.pointSize.intY;
+
+    var context = this.canvasCanvas.getContext("2d")
+
+    context.fillStyle = "white"
+    for (var i = 0; i < this.intStarAmount; i++) {
+      intPositionX = Math.floor(Math.random()*this.pointSize.intX);
+      intPositionY = Math.floor(Math.random()*this.pointSize.intY);
+      context.fillRect(intPositionX, intPositionY, 3, 3)
+    };
+    
+    context.fillRect(0, 0, 1, 1)
+  
+
+  }
+
+  this.getImage = function(){
+    return this.canvasCanvas;
+  }
+
+}
+
+
+
+
+
+
+
+
+
 
 window.setInterval(function(){
     if(gameProjectionCurrentGame != null){

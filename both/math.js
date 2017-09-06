@@ -20,6 +20,7 @@ function point(intX, intY){
 	this.toString = function(){
 		return "(" + this.intX + "|" + this.intY + ")";
 	}
+
 }
 
 
