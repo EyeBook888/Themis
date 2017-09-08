@@ -136,8 +136,9 @@ function gameProjection(){
 
   this.onCanvasSizeChange = function(){
     //because the dimensions for the background Image have change
-
-    gameProjectionCurrentGame.starBackgroundBackground.pointSize = new point(this.canvasCanvas.width, this.canvasCanvas.height)
+    var intWidth = 1920;
+    var intHeight= 1920/this.canvasCanvas.width * this.canvasCanvas.height;
+    gameProjectionCurrentGame.starBackgroundBackground.pointSize = new point(intWidth, intHeight)
     this.starBackgroundBackground.generateImage();
   }
 
@@ -838,8 +839,10 @@ this.drawRightJump = function(pointJumpOffPosition, pointJumpInPosition, imageSh
 function starBackground(){
   this.pointSize = new point(100, 100);
   this.canvasCanvas = document.createElement('canvas');
-  this.intStarAmount = 1000;
+  this.intStarDensity = 0.006;
+  //density
 
+  this.arrayStarColors = [[155, 176, 255], [170, 191, 255], [202, 215, 255], [248, 247, 255], [255, 244, 234], [255, 210, 161], [255, 210, 161], [255, 204, 111]]
 
   this.generateImage = function(){
     this.canvasCanvas.width  = this.pointSize.intX;
@@ -847,11 +850,32 @@ function starBackground(){
 
     var context = this.canvasCanvas.getContext("2d")
 
-    context.fillStyle = "white"
-    for (var i = 0; i < this.intStarAmount; i++) {
+    intStarAmount = Math.round(this.intStarDensity * this.pointSize.intX * this.pointSize.intY);
+
+
+    for (var i = 0; i < intStarAmount; i++) {
       intPositionX = Math.floor(Math.random()*this.pointSize.intX);
       intPositionY = Math.floor(Math.random()*this.pointSize.intY);
-      context.fillRect(intPositionX, intPositionY, 3, 3)
+
+      var intSize = Math.random()*2;
+      var intBrightness = Math.random() * 0.8;
+      var arrayColor = this.arrayStarColors[Math.floor(Math.random()*this.arrayStarColors.length)];
+
+      context.fillStyle = "rgba(" + arrayColor[0] + ","  + arrayColor[1] + ","  + arrayColor[2] + ","  + intBrightness + ")";
+      context.strokeStyle = "rgba(0,0,0,0)"
+
+      //context.fillRect(intPositionX, intPositionY, intSize, intSize)
+
+      context.beginPath();
+
+      context.arc(
+         intPositionX,
+         intPositionY,
+         intSize,
+         0*Math.PI,2*Math.PI)
+
+      context.stroke()
+      context.fill()
     };
     
     context.fillRect(0, 0, 1, 1)
